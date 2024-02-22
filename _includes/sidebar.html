@@ -44,18 +44,22 @@
 
   <div class="sidebar-bottom d-flex flex-wrap  align-items-center w-100">
     {% unless site.theme_mode %}
-      <button type="button" class="mode-toggle btn" aria-label="Switch Mode">
-        <i class="fas fa-adjust"></i>
-      </button>
+      {% comment %}
+        <button type="button" class="mode-toggle btn" aria-label="Switch Mode">
+          <i class="fas fa-adjust"></i>
+        </button>
+      {% endcomment %}
 
-      {% if site.data.contact.size > 0 %}
-        <span class="icon-border"></span>
-      {% endif %}
+      {% comment %}
+        {% if site.data.contact.size > 0 %}
+          <span class="icon-border"></span>
+        {% endif %}
+      {% endcomment %}
     {% endunless %}
 
     {% for entry in site.data.contact %}
       {% case entry.type %}
-        {% when 'github', 'twitter' %}
+        {% when 'github' %}
           {%- capture url -%}
             https://{{ entry.type }}.com/{{ site[entry.type].username }}
           {%- endcapture -%}
