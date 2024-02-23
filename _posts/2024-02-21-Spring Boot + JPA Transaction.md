@@ -228,7 +228,7 @@ public void testToPersistenceContext() {
 **테스트 결과**
 ![JPA 영속성 컨텍스트 테스트]({{site.url}}/assets/img/jpatransaction/7_JPA EntityManager Persistence Context Result.png)
 
-엔티이 매니저에 객체를 저장해 영속 상태 만들고 데이터를 저장했다. 이후 저장한 데이터를 조회했을 때 영속성 컨텍스트의 1차 캐시에 해당 엔티티가 존재하므로 DB를 조회하지 않는다.
+엔티티 매니저에 객체를 저장해 영속 상태 만들고 데이터를 저장했다. 이후 저장한 데이터를 조회했을 때 영속성 컨텍스트의 1차 캐시에 해당 엔티티가 존재하므로 DB를 조회하지 않는다.
 
 **영속 상태에서 준영속 상태로 변경 후 조회 테스트**
 
