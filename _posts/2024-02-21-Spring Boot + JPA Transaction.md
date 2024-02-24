@@ -270,3 +270,6 @@ JPA는 영속성 컨텍스트에 Entity를 보관할 때 최초의 상태로 저
 
 > 강제로 Flush를 호출하지 않는 이상 데이터 처리에 대한 동작을 하지 않기 때문에 조회(SELECT) 용도로만 사용해야한다.
 > {: .prompt-warning }
+
+> Github : [https://github.com/dowonl2e/jpatransaction](https://github.com/dowonl2e/jpatransaction)
+> {: .prompt-info }
