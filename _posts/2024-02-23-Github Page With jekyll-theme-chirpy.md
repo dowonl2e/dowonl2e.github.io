@@ -12,8 +12,8 @@ img_path: "/posts/20240223"
 
 아래 링크에서 파일을 다운로드 받거나 Web URL을 복제하여 로컬 리포지토리를 만들어준다. fork 후 Repository를 Clone해도 됩니다.
 
-- Theme : [http://jekyllthemes.org/themes/jekyll-theme-chirpy](http://jekyllthemes.org/themes/jekyll-theme-chirpy)
-- Github : [https://github.com/cotes2020/jekyll-theme-chirpy](https://github.com/cotes2020/jekyll-theme-chirpy?tab=readme-ov-file)
+- Theme : http://jekyllthemes.org/themes/jekyll-theme-chirpy
+- Github : https://github.com/cotes2020/jekyll-theme-chirpy?tab=readme-ov-file
 
 Github Page 생성시에는 Repository명은 아래와 같이 설정해줍니다.
 
