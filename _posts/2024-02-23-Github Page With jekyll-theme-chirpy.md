@@ -2,7 +2,7 @@
 title: Github Page With jekyll-theme-chirpy
 # author: dowonl2e
 date: 2024-02-23 12:00:00 +0800
-categories: [Blogging, Tutorial]
+categories: [Jekyll]
 tags: [Github Page]
 pin: true
 img_path: "/posts/20240223"

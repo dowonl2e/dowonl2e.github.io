@@ -2,7 +2,7 @@
 title: Spring Boot + JPA Transaction
 # author: dowonl2e
 date: 2024-02-21 14:25:00 +0800
-categories: [Blogging, Tutorial]
+categories: [Spring, Transaction]
 tags: [Transaction]
 pin: true
 img_path: "/posts/20240221"
@@ -23,7 +23,6 @@ Spring Initializr 웹 도구 사이트[(https://spring.io)](https://start.spring
 **Dependency 추가**
 
 - Spring Web
-- JDBC API
 - MySQL Driver
 - Spring Data JPA
 - Lombok
@@ -185,7 +184,7 @@ JPARepository 트랜잭션은 싱글 트랜잭션으로 보인다. 그래서 로
 
 JPA에서 트랜잭션을 선언하다보면 특정 메서드 부분에 readOnly 속성을 볼 수 있다. 해당 속성이 무엇이고 왜 사용하는지 알아보자.
 
-먼저, 정리하기 전 JPA의 영속성 컨택스트를 먼저 살펴보려한다.
+정리하기 전 JPA의 영속성 컨텍스트를 먼저 살펴보면
 
 ### **영속성 컨텍스트**
 
@@ -198,7 +197,7 @@ JPA에서 트랜잭션을 선언하다보면 특정 메서드 부분에 readOnly
 - **준영속 상태** : 영속성 컨텍스트에 저장되었다가 분리된 상태
 - **삭제 상태** : 연속성 컨텍스트에서 삭제된 상태
 
-### 1) 1차 캐시
+### 1) **1차 캐시**
 
 영속성 컨텍스트에는 1차 캐시가 있다. 엔티티를 1차 캐시에 저장해둔 상태이며 만약 엔티티를 조회했을 때 1차 캐시에 해당 엔티티가 있다면 DB를 조회하지 않고 1차 캐시에서 데이터를 가져온다.
 

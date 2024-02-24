@@ -2,7 +2,7 @@
 title: Spring Boot + MyBatis Transaction
 # author: dowonl2e
 date: 2024-02-21 12:30:00 +0800
-categories: [Blogging, Tutorial]
+categories: [Spring, Transaction]
 tags: [Transaction]
 pin: true
 img_path: "/posts/20240221"
@@ -247,10 +247,10 @@ Java의 오류를 크게 세 가지 유형으로 나뉩니다.
 - Checked Exception
 - Unchecked Exception
 - Error
-![Java 예외 종류]({{site.url}}/assets/img/transaction/10_Kind Of Exception.png)
-<center><a href="https://marrrang.tistory.com/56" target="_blank">https://marrrang.tistory.com/56</a></center>
-<br/>
-UncheckedException은 런타임 때 발생하는 예외이다. NullPointerException는 코딩을 하다보면 특정 객체가 인스턴스화가 되지 않았음에도 컴파일시에는 오류로 확인하지 않는다. ArrayIndexOutOfBoundsException도 마찬가지이다.
+  ![Java 예외 종류]({{site.url}}/assets/img/transaction/10_Kind Of Exception.png)
+  [<center>https://marrrang.tistory.com/56</center>](https://marrrang.tistory.com/56){:target="\_blank"}
+  <br/>
+  UncheckedException은 런타임 때 발생하는 예외이다. NullPointerException는 코딩을 하다보면 특정 객체가 인스턴스화가 되지 않았음에도 컴파일시에는 오류로 확인하지 않는다. ArrayIndexOutOfBoundsException도 마찬가지이다.
 
 반대로 CheckedException은 컴파일 중에 발생하는 예외이다. 테스트 코드에 IOException의 경우는 메서드 선언부에서 예외를 처리하거나 구현부에 try/catch로 감싸 처리를 해줘야한다.
 
