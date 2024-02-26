@@ -255,7 +255,7 @@ Java의 오류를 크게 세 가지 유형으로 나뉩니다.
 반대로 CheckedException은 컴파일 중에 발생하는 예외이다. 테스트 코드에 IOException의 경우는 메서드 선언부에서 예외를 처리하거나 구현부에 try/catch로 감싸 처리를 해줘야한다.
 
 > 롤백이 정상적으로 되지 않는 경우 발생한 예외가 어떤 오류에 포함되는지 확인할 필요가 있다.
-> {: .prompt-warning }
+{: .prompt-warning }
 
 ### **CheckedException의 경우 롤백은 어떻게 할까?**
 
@@ -390,4 +390,3 @@ public void multiSave() {
 - 모든 오류 처리는 중요하지만, 트랜잭션의 롤백 기준에서 CheckedException은 개발과정에 별도 작업이 필요할 수 있기에, 정상 프로세스에 대한 로그 확인은 필수로 해야한다.
 
 > Github : [https://github.com/dowonl2e/transaction](https://github.com/dowonl2e/transaction)
-> {: .prompt-info }

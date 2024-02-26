@@ -268,7 +268,6 @@ JPA는 영속성 컨텍스트에 Entity를 보관할 때 최초의 상태로 저
 따라서 트랜잭션을 커밋하더라도 영속성 컨텍스트가 Flush 되지 않아 엔티티의 등록, 수정, 삭제 등의 동작을 하지 않고, 또한 읽기 전용으로, 영속성 컨텍스트는 변경감지에 대한 **스냅샷**을 보관하지 않기 때문에 메모리가 절약되는 성능의 이점이 존재한다.
 
 > 강제로 Flush를 호출하지 않는 이상 데이터 처리에 대한 동작을 하지 않기 때문에 조회(SELECT) 용도로만 사용해야한다.
-> {: .prompt-warning }
+{: .prompt-warning }
 
 > Github : [https://github.com/dowonl2e/jpatransaction](https://github.com/dowonl2e/jpatransaction)
-> {: .prompt-info }

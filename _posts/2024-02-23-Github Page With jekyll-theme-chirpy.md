@@ -19,8 +19,8 @@ Github Page 생성시에는 Repository명은 아래와 같이 설정해줍니다
 
 - \<username\>.github.io
 
-> 구버전에는 Github Actions에 작업이 완료되면 gh-pages Branch가 자동 생성되었지만, main으로도 가능합니다.
-> {: .prompt-tip }
+> 이전에는 Github Actions 작업이 완료되면 gh-pages Branch가 자동 생성되었지만, main으로도 가능합니다.
+{: .prompt-tip }
 
 ## **설정 및 구성 확인**
 
