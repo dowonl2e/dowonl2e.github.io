@@ -186,7 +186,7 @@ public void save(BoardDto boardDto) {
 
 개발을 하다보면 다양한 오류를 마주하게 됩니다. 예를 들어 SQLException, NullPointerException, IOException 등
 
-다중 DB 트랜잭션의 경우 몇번의 데이터 처리가 되더라도 모두 정상처리가 되어야합니다. 하지만, 프로세스 진행 중 오류가 발생하면 앞에서 수행했던 것들은 롤백을 통해 원래의 데이터로 유지되어야합니다. 트랜잭션 4가지 특성 중 <span class="text-blue">**원자성(Atomicity)**</span>에 대한 내용입니다.
+다중 DB 트랜잭션의 경우 몇번의 데이터 처리가 되더라도 모두 정상처리가 되어야합니다. 하지만, 프로세스 진행 중 오류가 발생하면 앞에서 수행했던 것들은 롤백을 통해 원래의 데이터로 유지되어야합니다. 트랜잭션 4가지 특성 중 **원자성(Atomicity)**{: .text-blue }에 대한 내용입니다.
 
 **1) NullPointerException 발생**
 
@@ -240,7 +240,7 @@ IOException은 NullPointerException와 다르게 롤백을 하지 않고 커밋�
 
 Transactional.java 파일을 보면 주석에 아래 내용이 있다.
 ![트랜잭션 롤백 주석 내용.png]({{site.url}}/assets/img/transaction/9_Transaction Rollback Description.png)
-이 애너태이션에 설정한 롤백 규칙이 없으면 트랜잭션은 <span class="text-red">**RuntimeException, Error**</span>에 롤백되고 <span class="text-red">**Checked Exceptions**</span>은 해당되지 않는다라고 적혀있습니다.
+이 애너태이션에 설정한 롤백 규칙이 없으면 트랜잭션은 **RuntimeException, Error**{: .text-blue }에 롤백되고 **Checked Exceptions**{: .text-blue }은 해당되지 않는다라고 적혀있습니다.
 
 Java의 오류를 크게 세 가지 유형으로 나뉩니다.
 

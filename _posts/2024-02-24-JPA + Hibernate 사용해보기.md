@@ -62,7 +62,7 @@ logging:
 
 ### **ddl-auto 속성**
 
-중요 속성은 **jpa.hibernate.ddl-auto**이며 <span class="text-blue">**create, create-drop, update, validate, none**</span> 값 중 하나를 설정할 수 있다.
+중요 속성은 **jpa.hibernate.ddl-auto**이며 **create, create-drop, update, validate, none**{: .text-blue } 값 중 하나를 설정할 수 있다.
 
 - **create** : 엔티티로 등록된 클래스와 매핑되는 테이블을 자동으로 생성해준다. 이미 생성된 클래스가 있다면 기존 테이블을 삭제(drop) 후 다시 생성(create)한다.
   ![JPA Hibernate Create]({{site.url}}/assets/img/JPA/2_Hibernate Create.png)

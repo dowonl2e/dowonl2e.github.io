@@ -28,7 +28,7 @@ JPA, Hibernate, Spring Data JPA, RDB의 구조를 보면 아래와 같다.
 
 ### **JPA**
 
-Java Persistence API의 약자로 자바에서 관계형 데이터베이스를 사용에 있어서 필요한 기능을 제공하며 위에서 말한 ORM 기술에 대한 API 표준 명세이다. 라이브러리와 같이 특정 기능을 담당하는 것이 아니라 ORM을 사용하기 위해 만든 <span class="text-blue">**인터페이스의 모음**</span>이다. 그래서 명세이기 때문에 구현이 없다. 따라서 구현체가 있어야 JPA를 사용할 수 있다.
+Java Persistence API의 약자로 자바에서 관계형 데이터베이스를 사용에 있어서 필요한 기능을 제공하며 위에서 말한 ORM 기술에 대한 API 표준 명세이다. 라이브러리와 같이 특정 기능을 담당하는 것이 아니라 ORM을 사용하기 위해 만든 **인터페이스의 모음**{: .text-blue }이다. 그래서 명세이기 때문에 구현이 없다. 따라서 구현체가 있어야 JPA를 사용할 수 있다.
 
 ### **Hibernate**
 
@@ -38,4 +38,4 @@ Hibernate는 JPA의 구현체 중 하나이며, Java를 위한 ORM 프레임워�
 
 JPA와 같은게 아닌가? 라고 생각할 수 있지만, JPA를 쉽게 사용할 수 있도록 Spring에서 제공하고 있는 프레임워크이다.
 
-Hibernate와 Spring Data JPA를 이용했을때에 큰 차이가 없지만 Spring Data의 일관된 프로그래밍 모델로 인한 <span class="text-blue">**구현체와 저장소 교체의 용이성**</span>의 이유로 Spring Data JPA를 이용하는게 편하다.
+Hibernate와 Spring Data JPA를 이용했을때에 큰 차이가 없지만 Spring Data의 일관된 프로그래밍 모델로 인한 **구현체와 저장소 교체의 용이성**{: .text-blue }의 이유로 Spring Data JPA를 이용하는게 편하다.
