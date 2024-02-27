@@ -155,10 +155,10 @@ JPA는 수정 메서드가 따로 존재하지 않는다. JPQL로 쿼리를 따�
 @ToString
 @NoArgsConstructor
 public class Board {
-	
-	...
-	
-	//title, contents, modifyDate 필드를 수정하는 메서드 추가
+
+  ...
+
+  //title, contents, modifyDate 필드를 수정하는 메서드 추가
   public void updateTitleContents(String title, String contents){
     this.title = title;
     this.contents = contents;
