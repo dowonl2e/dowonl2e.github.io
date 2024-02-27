@@ -7,7 +7,7 @@ tags: [JPA, Spring Data JPA]
 pin: true
 img_path: "/assets"
 image:
-  path: /commons/Spring Data JPA.png
+  path: /commons/Spring-Data-JPA.png
   alt: Spring Data JPA
 ---
 
