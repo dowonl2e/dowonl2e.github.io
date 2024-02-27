@@ -8,7 +8,6 @@ tail_includes:
   - post-nav
   - comments
 ---
-
 {% include lang.html %}
 
 <article class="px-1">
@@ -22,13 +21,65 @@ tail_includes:
         {% include datetime.html date=page.date tooltip=true lang=lang %}
       </span>
 
+      {{ site.data.locales[lang].post.written_by }}
+
+      <em>
+        {% if authors %}
+          {% for author in authors %}
+            {% if site.data.authors[author].url -%}
+              <a href="{{ site.data.authors[author].url }}">{{ site.data.authors[author].name }}</a>
+            {%- else -%}
+              {{ site.data.authors[author].name }}
+            {%- endif %}
+            {% unless forloop.last %}{{ '</em>, <em>' }}{% endunless %}
+          {% endfor %}
+        {% else %}
+          <a href="{{ site.social.links[0] }}">{{ site.social.name }}</a>
+        {% endif %}
+      </em>
+
       <!-- lastmod date -->
-      {% if page.last_modified_at and page.last_modified_at != page.date %}
+      {% comment %}
+        {% if page.last_modified_at and page.last_modified_at != page.date %}
+          <span>
+            {{ site.data.locales[lang].post.updated }}
+            {% include datetime.html date=page.last_modified_at tooltip=true lang=lang %}
+          </span>
+        {% endif %}
+      {% endcomment %}
+
+      <div class="d-flex justify-content-between">
+        <!-- author(s) -->
         <span>
-          {{ site.data.locales[lang].post.updated }}
-          {% include datetime.html date=page.last_modified_at tooltip=true lang=lang %}
+          {% if page.author %}
+            {% assign authors = page.author %}
+          {% elsif page.authors %}
+            {% assign authors = page.authors %}
+          {% endif %}
+
+          {% comment %}
+            {{ site.data.locales[lang].post.written_by }}
+
+            <em>
+              {% if authors %}
+                {% for author in authors %}
+                  {% if site.data.authors[author].url -%}
+                    <a href="{{ site.data.authors[author].url }}">{{ site.data.authors[author].name }}</a>
+                  {%- else -%}
+                    {{ site.data.authors[author].name }}
+                  {%- endif %}
+                  {% unless forloop.last %}{{ '</em>, <em>' }}{% endunless %}
+                {% endfor %}
+              {% else %}
+                <a href="{{ site.social.links[0] }}">{{ site.social.name }}</a>
+              {% endif %}
+            </em>
+          {% endcomment %}
         </span>
-      {% endif %}
+
+        <!-- read time -->
+        {% comment %} {% include read-time.html content=content prompt=true lang=lang %} {% endcomment %}
+      </div>
 
       {% if page.image %}
         {% capture src %}src="{{ page.image.path | default: page.image }}"{% endcapture %}
@@ -46,37 +97,6 @@ tail_includes:
           {%- endif -%}
         </div>
       {% endif %}
-
-      <div class="d-flex justify-content-between">
-        <!-- author(s) -->
-        <span>
-          {% if page.author %}
-            {% assign authors = page.author %}
-          {% elsif page.authors %}
-            {% assign authors = page.authors %}
-          {% endif %}
-
-          {{ site.data.locales[lang].post.written_by }}
-
-          <em>
-            {% if authors %}
-              {% for author in authors %}
-                {% if site.data.authors[author].url -%}
-                  <a href="{{ site.data.authors[author].url }}">{{ site.data.authors[author].name }}</a>
-                {%- else -%}
-                  {{ site.data.authors[author].name }}
-                {%- endif %}
-                {% unless forloop.last %}{{ '</em>, <em>' }}{% endunless %}
-              {% endfor %}
-            {% else %}
-              <a href="{{ site.social.links[0] }}">{{ site.social.name }}</a>
-            {% endif %}
-          </em>
-        </span>
-
-        <!-- read time -->
-        {% include read-time.html content=content prompt=true lang=lang %}
-      </div>
       <!-- .d-flex -->
     </div>
     <!-- .post-meta -->
