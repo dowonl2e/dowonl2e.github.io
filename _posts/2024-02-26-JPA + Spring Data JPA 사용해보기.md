@@ -5,7 +5,10 @@ date: 2024-02-26 14:00:00 +0800
 categories: [Spring, JPA]
 tags: [JPA, Spring Data JPA]
 pin: true
-img_path: "/posts/20240226"
+img_path: "/assets"
+image:
+  path: /commons/Spring Data JPA.png
+  alt: Spring Data JPA
 ---
 
 ## **개발환경 및 프로젝트 세팅**

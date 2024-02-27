@@ -5,7 +5,10 @@ date: 2024-02-24 14:00:00 +0800
 categories: [Spring, JPA]
 tags: [JPA, Hibernate]
 pin: true
-img_path: "/posts/20240224"
+img_path: "/assets"
+image:
+  path: /commons/Hibernate.jpeg
+  alt: Hibernate
 ---
 
 ## **개발 환경**
