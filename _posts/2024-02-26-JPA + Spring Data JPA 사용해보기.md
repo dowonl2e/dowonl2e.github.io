@@ -15,7 +15,7 @@ image:
 
 개발 환경 및 프로젝트 세팅은 JPA + Hibernate와 동일하게 이용하겠습니다.
 
-> [JPA + Hibernate 사용해보기]({{site.url}}/posts/JPA-+-Hibernate-사용해보기){:target="\_blank"}
+> [JPA + Hibernate 사용해보기]({{site.url}}/posts/JPA-+-Hibernate-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EA%B8%B0){:target="\_blank"}
 
 ## **신규 테스트 클래스 생성**
 
