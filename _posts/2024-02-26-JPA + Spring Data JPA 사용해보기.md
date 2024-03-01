@@ -82,7 +82,7 @@ public void testToSpringDataJpaInsert(){
 
 **테스트 결과**
 ![Spring Data JPA 데이터 추가 테스트1]({{site.url}}/assets/img/JPA/11_Spring Data JPA Insert Test1.png)
-결과를 보면 select 이후에 insert를 하게 된다. 이 이유는 id 필드와 연관이 있다.<br/>아래 SimpleJpaRepository.java 파일에 save 메서드를 보면
+결과를 보면 select 이후에 insert를 하게 된다. 이 이유는 엔티티의 식별자인 id 필드와 연관이 있다.<br/>아래 SimpleJpaRepository.java 파일에 save 메서드를 보면
 
 ```java
 @Transactional
@@ -101,7 +101,7 @@ public <S extends T> S save(S entity) {
 }
 ```
 
-**isNew**{: .text-blue } 메서드의 경우 엔티티의 id값 여부에 따라 영속할지 아니면 병합할지를 결정한다. id 값이 null인 경우 조회할 데이터를 찾을 필요가 없기에 영속상태로 만들어 insert 하게되며, id 값이 있을 경우 merge 과정에서 DB에서 데이터 조회 후 영속상태로 만들고 데이터 여부에 따라 insert할지 update할지 결정한다.
+**isNew**{: .text-blue } 메서드의 경우 엔티티의 id값 여부에 따라 영속할지 아니면 병합할지를 결정한다. id 값이 null인 경우 조회할 데이터를 찾을 필요가 없기에 영속상태로 만들어 insert 하게되며, id 값이 있을 경우 merge 과정에서 DB에서 데이터 조회 후 영속상태로 만들고 데이터 여부에 따라 insert 또는 update를 결정한다.
 
 테스트 코드에 **id((long)1)**{: .text-blue } 코드를 지우고 테스트할 경우 insert만 실행되는 것을 볼 수 있다.
 ![Spring Data JPA 데이터 추가 테스트2]({{site.url}}/assets/img/JPA/12_Spring Data JPA Insert Test2.png)
