@@ -112,16 +112,12 @@ Page 인터페이스로 반환 할 경우 페이징에 필요한 값들을 가�
 
 **BoardRepositoryImpl.java** 의 페이징 구현부에 Page 인터페이스 구현체인 **PageImpl**, 페이징 유틸의 역할을 하는 **PageableExecutionUtils**를 이용해 반환하는 코드가 있다. 두 방법의 차이는 아래와 같다.
 
-- new PageImpl<>()
-    - 전체 개수를 구하는 쿼리를 무조건 실행한다.
-- PageableExecutionUtils.getPage()
-    - **페이지 시작이면서 레코드 개수가 페이지 사이즈보다 작을 때** 또는 **마지막 페이지일 때** 카운트 쿼리를 실행한다.
+- PageImpl 반환 : 전체 개수를 구하는 쿼리를 무조건 실행한다.
+- PageableExecutionUtils.getPage 반환 : 전체 개수를 구하는 쿼리를 필요에 따라 실행한다.
 
 테스트 코드에서는 PageImpl 객체를 반환함으로써 전체 개수를 가져오는 쿼리가 실행되는 것을 볼 수 있다.
 
-**PageableExecutionUtils 주석을 풀고 PageImpl을 주석한 뒤 그리고 페이지 사이즈를 20으로 늘려보자.**
-
-**테스트 결과**
+**PageableExecutionUtils 주석을 풀고 PageImpl을 주석한 후에 페이지 사이즈를 20으로 늘려보자**
 ![Querydsl Paging Test2]({{site.url}}/assets/img/Querydsl/8_Querydsl Paging Test2.png)
 Page 구현체와 다르게 카운트 쿼리가 실행되지 않았다. 아래 PageableExecutionUtils.getPage 메서드 내용을 보면 PageImpl 객체를 생성하여 반환한다.
 
@@ -148,19 +144,16 @@ public static <T> Page<T> getPage(List<T> content, Pageable pageable, LongSuppli
   return new PageImpl<>(content, pageable, totalSupplier.getAsLong());
 }
 ```
-- `pageable.getOffset() == 0`시작페이지일 때
-- `pageable.getPageSize() > content.size()` 페이지 사이즈가 content 사이즈보다 클 때
-- `pageable.getPageSize() > content.size()`마지막페이지일 때
+- `pageable.getOffset() == 0` && `pageable.getPageSize() > content.size()` 시작페이지이고 페이지 사이즈가 content 사이즈보다 클 때
+- `content.size() != 0 && pageable.getPageSize() > content.size()`마지막페이지일 때
 
 호출 시점을 지연시켜 불필요한 count 쿼리 실행 없이 성능 최적화하고 있다.
 
 ## **Dynamic Query**
 
-검색기능으로 Querydsl에서 동적 쿼리를 어떻게 처리하는지 알아보겠습니다.
+검색 조건으로 Querydsl에서 동적 쿼리를 어떻게 처리하는지 알아보겠습니다. Paging Querydsl 코드에 제목, 내용을 구분하여 검색할 수 있는 기능을 추가하겠습니다.
 
 **BoardRepositoryImp.java 코드 추가**
-
-Paging Querydsl 코드에 제목, 내용을 구분하여 검색할 수 있는 기능을 추가해주겠습니다.
 ```java
 private List<BoardResponseDto> getPagingBoards(String keyword, Pageable pageable){
   QBoard board = new QBoard("board");
@@ -189,7 +182,7 @@ private JPAQuery<Long> getBoardCount(String keyword){
       .select(board.id.count())
       .from(board)
       .where(
-					expressionTrue()
+          expressionTrue()
               .or(titleLike(board, keyword))
               .or(contentsLike(board, keyword))
       ); // => 추가
@@ -206,11 +199,14 @@ private BooleanExpression contentsLike(QBoard board, String keyword){
 }
 ```
 
-조건문 쿼리를 반환하는 메소드를 볼 수 있다. BooleanExpression은 Java의 Boolean 타입을 Querydsl만의 타입으로 표현한 클래스이다. 이 타입을 통해 조건절에서의 여부를 판별할 수 있다.
+조건문 쿼리를 반환하는 메소드를 볼 수 있다. BooleanExpression은 Java의 Boolean 타입을 Querydsl만의 타입으로 표현한 클래스이다.
 
-- expressionTrue() : 항상 true를 반환한다는 용도 (WHERE 1 = 1), NullPointerException 발생을 막기위해 추가할 수 있다.
+- expressionTrue() : 항상 true를 반환한다는 용도 (WHERE 1 = 1), **Fluent API**{: .text-blue }에서의 NullPointerException 발생을 막기위해 추가할 필요가 있다.
 
-키워드 검색에서 검색 유형을 선택하는 기능이 있다면 유형 검색 파라미터 추가 후 아래와 같은 방식으로 조건에 맞는 유형의 메서드를 호출해 사용할 수 있다. 
+키워드 검색에서 검색 유형을 선택하는 기능이 있다면 유형 검색 파라미터 추가 후 아래와 같은 방식으로 조건에 맞는 유형의 메서드를 호출해 사용할 수 있다.
+
+> **Fluent API**{: .text-blue }<br/>메소드 체이닝에 기반한 객체지향 API 설계 메소드
+{: .prompt-info }
 
 ```java
 private BooleanExpression titleContentsTypeLike(QBoard board, String keywordKind, String keyword){
@@ -357,7 +353,7 @@ SHOW profiles;
 
 ### **Like Search, Full Text Search 비교**
 
-테스트 데이터는 약 70만개로 제목 및 내용을 검색한다는 기준으로 비교해보겠습니다.
+테스트 데이터는 약 70만개로 제목 및 내용 검색을 비교했습니다.
 
 **Like Search**
 
