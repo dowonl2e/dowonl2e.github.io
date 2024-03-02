@@ -15,7 +15,7 @@ image:
 
 이번에는 Querydsl에서 Paging, Dynamic Query, MySQLDialect를 통한 Full-text Index를 이용한 검색에 대해 정리해보고자 합니다.
 
-프로젝트는 Spring Data JPA + Querydsl 사용해보기(1) 게시물과 동일한 환경으로 진행하겠습니다.
+프로젝트는 Spring Data JPA + Querydsl 사용해보기(1)와 동일한 환경으로 진행하겠습니다.
 > [JPA + Spring Data JPA + Querydsl 사용해보기(1)](/posts/JPA-+-Spring-Data-JPA-+-Querydsl-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EA%B8%B0_1/){:target="\_blank"}
 
 ## **Paging**
