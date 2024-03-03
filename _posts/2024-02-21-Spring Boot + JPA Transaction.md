@@ -25,6 +25,7 @@ Spring Initializr 웹 도구 사이트[(https://spring.io)](https://start.spring
 - Spring Web
 - MySQL Driver
 - Spring Data JPA
+- Spring Data JDBC
 - Lombok
 
 ## **애플리케이션 옵션 설정**
@@ -70,7 +71,7 @@ logging:
           jpa: debug
 ```
 
-Spring 2 버전 이후부터는 디폴트 DBCP가 HikariCP로 적용됩니다. 그래서 위 구조로 옵션을 설정하면 별도 데이터베이스 구성없이 HikariCP가 적용된다.
+Spring 2 버전 이후부터는 디폴트 DBCP가 HikariCP 입니다.
 
 - **jpa.open-in-view**
   - **true** : Client에 응답이 완료 된 후 DB 커넥션을 반환
