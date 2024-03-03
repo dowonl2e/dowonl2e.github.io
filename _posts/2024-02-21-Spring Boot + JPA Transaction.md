@@ -44,6 +44,10 @@ spring:
     hikari:
       connection-test-query: SELECT NOW() FROM DUAL
       connection-timeout: 30000
+      validation-timeout: 30000
+      minimum-idle: 5
+      max-lifetime: 240000
+      maximum-pool-size: 20
   jpa:
     open-in-view: true # JPA의 영속성 컨텍스트가 DB 커넥션 반환 기점을 설정
     show-sql: true # JPA SQL  로그 출력 여부를 설정
@@ -66,12 +70,39 @@ logging:
           jpa: debug
 ```
 
-Spring 2 버전부터는 디폴트 DBCP가 HikariCP로 적용됩니다. 그래서 위 구조로 옵션을 설정하면 별도 데이터베이스 구성없이 HikariCP가 적용된다.
+Spring 2 버전 이후부터는 디폴트 DBCP가 HikariCP로 적용됩니다. 그래서 위 구조로 옵션을 설정하면 별도 데이터베이스 구성없이 HikariCP가 적용된다.
 
 - **jpa.open-in-view**
   - **true** : Client에 응답이 완료 된 후 DB 커넥션을 반환
   - **false** : 해당 메서드가 끝날 때 DB 커넥션을 반환
 - **jpa.hibernate.naming.physical-strategy** : JPA 테이블의 DDL 네이밍 전략을 설정
+
+**DataSource 설정**
+
+```java
+@Configuration
+public class DataSourceConfig {
+
+  @Bean
+  @Primary
+  @ConfigurationProperties("spring.datasource")
+  public DataSourceProperties dataSourceProperties() {
+    return new DataSourceProperties();
+  }
+
+  @Bean
+  @ConfigurationProperties("spring.datasource.hikari")
+  public HikariDataSource dataSource(DataSourceProperties properties) {
+    return properties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
+  }
+
+}
+```
+
+**HikariCP 설정 결과**
+![HikariCP 설정 결과1]({{site.url}}/assets/img/jpatransaction/0-1_HikariCP Test.png)
+![HikariCP 설정 결과2]({{site.url}}/assets/img/jpatransaction/0-2_HikariCP Test.png)
+
 
 ### **JPA DDL 네이밍 전략 설정**
 
