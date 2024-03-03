@@ -153,7 +153,7 @@ public static <T> Page<T> getPage(List<T> content, Pageable pageable, LongSuppli
 
 검색 조건으로 Querydsl에서 동적 쿼리를 어떻게 처리하는지 알아보겠습니다. Paging Querydsl 코드에 제목, 내용을 구분하여 검색할 수 있는 기능을 추가하겠습니다.
 
-**BoardRepositoryImp.java 코드 추가**
+**BoardRepositoryImpl.java 코드 추가**
 ```java
 private List<BoardResponseDto> getPagingBoards(String keyword, Pageable pageable){
   QBoard board = new QBoard("board");
