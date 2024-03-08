@@ -167,7 +167,7 @@ jobs:
             chmod 777 /home/ec2-user/docker/deploy.sh
             /home/ec2-user/docker/deploy.sh $IMAGE_TAG $DOCKER_USERNAME
 ```
-- **`[ secrets.OOO ]`**로 표기법은 **${\{ secrets.OOO }}** 로 변경 후 정상 동작됩니다.
+- **`[ secrets.OOO ]`** 표기를 **${\{ secrets.OOO }}** 로 변경해야 변수 사용이 가능합니다.
 - **`secrets.OOO`**을 Repository > Settings > Secrets and variables > Actions에 **Repository secrets**에 필요 값을 추가하여 사용하시면됩니다.
 
 ### **4) 배포 스크립트 작성**
