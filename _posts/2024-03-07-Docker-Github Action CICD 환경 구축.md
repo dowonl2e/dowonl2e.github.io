@@ -85,7 +85,7 @@ ENTRYPOINT ["java", "-jar", "jewelry.jar"]
 ### **2) Github Action Workflow 생성**
 ![Github Actions Workflow]({{site.url}}/assets/img/Docker-GithubActions-CICD/2_Github Actions Workflow1.png)
 
-Repository의 상단에 **Actions**를 확인할 수 있으며 프로젝트 환경에 맞게 선택 또는 검색하시면됩니다.
+Repository의 상단에 **Actions**통해 Workflow를 구성할 수 있으며 프로젝트 환경에 맞게 선택하면 됩니다.
 
 > 프로젝트 및 서버 환경에 맞는 Workflow를 선택해야하며 필요한 Job 추가 또는 수정이 필요합니다.
 {: .prompt-info }
@@ -152,7 +152,7 @@ jobs:
           docker push [ secrets.DOCKER_REPO ]/jewelry:[ secrets.DOCKER_IMAGE_TAG ]
       
       # appleboy/ssh-action@master 액션을 사용하여 지정한 서버에 ssh로 접속하고, 배포 스크립트를 실행
-      # 배포 스크립트 실행 : EC2의 실행중인 컨테이너를 중단, Docker Repoistory에 Push한 내용을 받아 컨테이너를 실행
+      # 배포 스크립트 실행 : EC2의 실행중인 컨테이너를 중단, Docker Repoistory에 Push한 이미지를 가져와 컨테이너를 실행
       - name: Deploy
         uses: appleboy/ssh-action@master
         id: deploy
