@@ -2,7 +2,7 @@
 title: Spring Boot + Docker + Github Actions를 활용한 CI/CD 환경 구축
 # author: dowonl2e
 date: 2024-03-07 13:00:00 +0800
-categories: [Docker, Github Actions, CI/CD]
+categories: [DevOps, CI/CD]
 tags: [Spring, AWS, Docker, Github Actions, CI/CD]
 pin: true
 ---
