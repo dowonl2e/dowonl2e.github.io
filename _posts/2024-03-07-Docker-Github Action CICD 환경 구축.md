@@ -232,4 +232,4 @@ while [ 1 = 1 ]; do
 
 CI/CD 환경을 구축하면서 아쉬웠던 점은, Workflow 작업에 배포 스크립트 같이 올려서 진행해보려했지만, 방법을 찾지 못했습니다. 그래서 스크립트 파일을 서버에 생성하고 실행하는 방식으로 처리했는데, 수정해야하는 경우가 생기면 서버에 직접 접속해야하는 번거로움이 있었습니다.
 
-AWS의 S3, AWS CodeDeploy를 통해 CI/CD 환경을 구축하는 방법도 있지만, Docker를 좀 더 사용해보고자 Docker, Github Action을 활용해서 CI/CD 환경을 구축해보았습니다. 추후에 S3, AWS CodeDeploy를 통한 CI/CD 환경도 구축해보겠습니다.
+AWS의 S3, AWS CodeDeploy를 통해 CI/CD 환경을 구축하는 방법도 있지만, Docker를 좀 더 사용해보고자 Docker, Github Action을 활용해서 CI/CD 환경을 구축해보았습니다. 추후에 S3, AWS CodeDeploy를 통한 CI/CD 환경도 구축하겠습니다.
