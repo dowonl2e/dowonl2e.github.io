@@ -1,5 +1,5 @@
 ---
-title: JPA + Spring Data JPA 사용해보기
+title: JPA + Spring Data JPA 사용해보기(1)
 # author: dowonl2e
 date: 2024-02-26 14:00:00 +0800
 categories: [Spring, JPA]
