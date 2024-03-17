@@ -201,22 +201,22 @@ if [ -z "$IMAGE_TAG" ]; then
   exit 1
 fi
 
-echo "1. current jewelry container down"
+echo "1. Current Jewelry Docker Container Down"
 docker-compose -f /home/ec2-user/docker/docker-compose.yml stop jewelry
 
-echo "2. get jewelry image"
+echo "2. Jewelry Docker Image Pull"
 docker-compose -f /home/ec2-user/docker/docker-compose.yml pull jewelry
 
-echo "3. jewelry container up"
+echo "3. Jewelry Docker Container Run"
 docker-compose -f /home/ec2-user/docker/docker-compose.yml up -d jewelry
 
 while [ 1 = 1 ]; do
-  echo "3. jewelry health check..."
+  echo "3. Jewelry Health Check"
   sleep 3
   REQUEST=$(curl http://127.0.0.1:8080) # 8080포트 request
 
   if [ -n "$REQUEST" ]; then # 서비스 가능하면 health check 중지
-    echo "health check success"
+    echo "Jewelry Health Check Success"
 ```
 
 ### **5) CI/CD 테스트**
