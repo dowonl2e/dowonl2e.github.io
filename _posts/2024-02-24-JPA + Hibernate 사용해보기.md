@@ -247,7 +247,7 @@ public void testToFind(){
 
 **테스트 결과**
 
-![JPA Select]({{site.url}}/assets/img/JPA/7_JPA Select.png)
+![JPA Select]({{site.url}}/assets/img/JPA/7_JPA SELECT.png)
 
 ### **3) 데이터 수정**
 
@@ -276,7 +276,7 @@ public void testToUpdate(){
 
 **테스트 결과**
 
-![JPA Update]({{site.url}}/assets/img/JPA/8_JPA Update.png)
+![JPA Update]({{site.url}}/assets/img/JPA/8_JPA UPDATE.png)
 
 ### **4) 데이터 삭제**
 
@@ -300,4 +300,4 @@ public void testToRemove(){
 ```
 
 **테스트 결과**
-![JPA Delete]({{site.url}}/assets/img/JPA/9_JPA Delete.png)
+![JPA Delete]({{site.url}}/assets/img/JPA/9_JPA DELETE.png)
