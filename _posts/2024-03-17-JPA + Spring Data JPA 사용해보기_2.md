@@ -11,7 +11,7 @@ image:
   alt: Spring Data JPA
 ---
 
-**JPA + Spring Data JPA 사용해보기(1)**에서 기본적인 CRUD에 대한 내용을 포스팅했습니다. 이번에는 Spring Data JPA Query Method의 조건절 및 동적 쿼리, 페이징 및 정렬을 대해 적어보겠습니다.
+**JPA + Spring Data JPA 사용해보기(1)**에서 기본적인 CRUD에 대한 내용을 포스팅했습니다. 이번에는 Spring Data JPA Query Method의 조건절 및 동적 쿼리, 페이징 및 정렬에 대해 적어보겠습니다.
 
 > [JPA + Spring Data JPA 사용해보기(1)](/posts/JPA-+-Spring-Data-JPA-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EA%B8%B0_1/){:target="\_blank"}
 
