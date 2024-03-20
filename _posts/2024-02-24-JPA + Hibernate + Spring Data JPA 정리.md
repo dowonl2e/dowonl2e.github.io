@@ -88,4 +88,8 @@ JPA와 같은게 아닌가? 라고 생각할 수 있지만, JPA를 쉽게 사용
 
 Hibernate와 Spring Data JPA를 이용했을때에 큰 차이가 없지만 Spring Data의 일관된 프로그래밍 모델로 인한 **구현체와 저장소 교체의 용이성**{: .text-blue }의 이유로 Spring Data JPA를 이용하는게 편하다.
 
-> [JPA + Spring Data JPA 사용해보기](/posts/JPA-+-Spring-Data-JPA-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EA%B8%B0/){:target="\_blank"}
+> [JPA + Spring Data JPA 사용해보기(CRUD)](/posts/JPA-+-Spring-Data-JPA-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EA%B8%B0_1/){:target="\_blank"}
+
+> [JPA + Spring Data JPA 사용해보기(Dynamic Query, Paging, Sort)](/posts/JPA-+-Spring-Data-JPA-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EA%B8%B0_2/){:target="\_blank"}
+
+> [JPA + Spring Data JPA 사용해보기(Join)](/posts/JPA-+-Spring-Data-JPA-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EA%B8%B0_3/){:target="\_blank"}
