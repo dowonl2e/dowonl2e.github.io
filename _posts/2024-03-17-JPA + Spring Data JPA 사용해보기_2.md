@@ -1,5 +1,5 @@
 ---
-title: JPA + Spring Data JPA 사용해보기(2)
+title: JPA + Spring Data JPA 사용해보기(Dynamic Query, Paging, Sort)
 # author: dowonl2e
 date: 2024-03-17 15:00:00 +0800
 categories: [Spring, JPA]
@@ -13,16 +13,16 @@ image:
 
 **JPA + Spring Data JPA 사용해보기(1)**에서 기본적인 CRUD에 대한 내용을 포스팅했습니다. 이번에는 Spring Data JPA Query Method의 조건절 및 동적 쿼리, 페이징 및 정렬에 대해 적어보겠습니다.
 
-> [JPA + Spring Data JPA 사용해보기(1)](/posts/JPA-+-Spring-Data-JPA-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EA%B8%B0_1/){:target="\_blank"}
+> [JPA + Spring Data JPA 사용해보기(CRUD)](/posts/JPA-+-Spring-Data-JPA-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EA%B8%B0_1/){:target="\_blank"}
 
 # **Query Method**
 
 Spring Data JPA은 SQL을 작성하지 않고 메소드만으로 기능을 구현할 수 있습니다. 이 메서드 명으로 SQL을 생성하는 것을 Query Method라고 합니다. Query Method의 이름은 Subject Part, Predicate Part로 나뉩니다.
 
 - Subject Part : 메서드 명에서 첫 번째 By까지의 부분
-    - find…By, exists…By, delete…By, count..By 등
+  - find…By, exists…By, delete…By, count..By 등
 - Predicate Part : 첫 번째 By 이후에 나오는 부분
-    - And, Or, Equals, GreaterThan, IsNull 등
+  - And, Or, Equals, GreaterThan, IsNull 등
 
 두 부분에 대한 전체 키워드는 아래 Spring Data JPA 공식 문서를 통해서 확인하실 수 있습니다.
 

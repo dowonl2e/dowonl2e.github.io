@@ -35,7 +35,7 @@ Querydsl의 핵심 원칙은 **타입 안정성(Type safety)**{: .text-blue }�
 
 개발 환경 및 프로젝트 설정은 JPA + Spring Data JPA에서 프로젝트를 이용하겠습니다.
 
-> [JPA + Spring Data JPA 사용해보기](/posts/JPA-+-Spring-Data-JPA-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EA%B8%B0_1/){:target="\_blank"}
+> [JPA + Spring Data JPA 사용해보기(CRUD)](/posts/JPA-+-Spring-Data-JPA-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EA%B8%B0_1/){:target="\_blank"}
 
 ## **Querydsl 설정**
 
