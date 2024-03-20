@@ -1,7 +1,7 @@
 ---
 title: JPA + Spring Data JPA 사용해보기(Join)
 # author: dowonl2e
-date: 2024-03-20 15:55:00 +0800
+date: 2024-03-20 12:55:00 +0800
 categories: [Spring, JPA]
 tags: [JPA, Spring Data JPA]
 pin: true
