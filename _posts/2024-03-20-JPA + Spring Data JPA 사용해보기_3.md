@@ -75,7 +75,7 @@ public class Member {
 
 - @OneToMany : Join 확인을 위해 즉시로딩(EAGER)로 지정해두었습니다. (default : FetchType.LAZY)
 - @JoinColumn
-    - name : 타겟 엔티티(Board)의 필드를 지정해줍니다.
+    - name : 연관관계 주인인 Board 엔티티의 필드를 지정해줍니다.
     - referencedColumnName : Board 엔티티와 연관관계를 맺을 Member 엔티티의 필드를 지정해줍니다. 필드를 별도로 지정하지 않는 경우 @Id로 지정된 필드로 조인됩니다.
 
 > Board.java 파일에서는 ManyToOne 관계를 설정할 필요 없습니다.
@@ -113,8 +113,8 @@ public class Board {
 
 - @ManyToOne : Join 확인을 위해 즉시로딩(EAGER)로 지정해두었습니다. (default : FetchType.EAGER)
 - @JoinColumn
-    - name : Member 엔티티와 연관관계를 맺을 Board 엔티티의 필드를 지정해줍니다.
-    - referencedColumnName : 타겟 엔티티(Member)의 필드를 지정해줍니다. 필드를 별도로 지정하지 않는 경우 @Id로 지정된 필드로 조인됩니다.
+    - name : 연관관계 주인인 Board 엔티티의 필드를 지정해줍니다.
+    - referencedColumnName : Member의 필드를 지정해줍니다. 필드를 별도로 지정하지 않는 경우 @Id로 지정된 필드로 조인됩니다.
 
 > Member.java 파일에서는 OneToMany 관계를 설정할 필요 없습니다.
 {: .prompt-info }
@@ -303,6 +303,315 @@ public class Board {
 **테스트 결과**
 
 ![Spring Data JPA 지연로딩 Outer Join 단건 결과]({{site.url}}/assets/img/JPA3/3_BOARD_SINGLE_SELECT_LAZY.png)
+
+## **ManyToMany**
+
+다대다 연관관계는 정규화된 테이블 2개로 표현할 수는 없습니다. 하지만, JPA에서의 객체로는 다대다 관계를 만들어낼 수 있습니다. 사용자**(연관관계의 주인)**는 여러 게시물을 ‘좋아요’를 할 수 있으며, 게시물은 여러 사용자에게 ‘좋아요’를 받을 수 있습니다. ‘좋아요’ 기능을 예로 들어보겠습니다.
+
+### **ManyToMany 양방향 연관관계**
+
+**Member.java**
+
+```java
+@Getter
+@Entity(name = "tb_member")
+@NoArgsConstructor
+public class Member {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Comment("PK")
+  private String memberNo;
+
+  ...
+
+  @ManyToMany
+  @JoinTable(
+      name = "tb_board_like",
+      joinColumns = {@JoinColumn(name = "memberNo")},
+      inverseJoinColumns = {@JoinColumn(name = "id")}
+  )
+  private List<Board> boards = new ArrayList<>();
+
+  ...
+
+}
+```
+
+**Board.java**
+
+```java
+@Entity(name = "tb_board")
+@Comment("게시판")
+@Getter
+@ToString
+@NoArgsConstructor
+public class Board {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Comment("PK")
+  private Long id;
+
+  ...
+
+  @ManyToMany(mappedBy = "boards")
+  private List<Member> members = new ArrayList<>();
+
+  ...
+
+}
+```
+
+- @ManyToMany : 연관관계 주인과 주인이 아닌 객체에 선언해주며, 주인이 아닌 객체에는 연관관계 주인에서 지정한 필드명을 넣어줍니다.
+- @JoinTable : 두 객체 사이의 관계 테이블을 생성하기 위해 사용합니다.
+  - name : 관계 테이블명을 지정합니다.
+  - JoinColumns : 관계 테이블에 존재하는 다대다 연관관계의 주인(Member)에 해당하는 외래키를 매핑합니다.
+  - inverseJoinColumns : 관계 테이블에 존재하는 다대다 연관관계의 주인이 아닌 객체(Board)에 해당하는 외래키를 매핑합니다.
+
+**두 객체 사이의 관계 테이블 생성 결과**
+
+![Spring Data JPA ManyToMany Relation Result]({{site.url}}/assets/img/JPA3/9_MANYTOMANY_RELATION_TABLE.png)
+
+별도 엔티티 생성 없이 ManyToMany를 통해서 편리하게 두 객체 사이에 관계 테이블이 생성되는 것을 볼 수 있습니다.
+
+### **ManyToMany의 한계**
+
+위 처럼 단순히 두 객체 사이에 ManyToMany 관계를 설정하므로서, 편리하고 간단하게 관계 테이블을 생성해주는 것을 볼 수 있습니다.
+
+하지만, 위 관계 테이블이 단순히 사용자, 게시판의 엔티티를 연결한다는 점에서만 사용하기에는 아래와 같은 한계가 있습니다.
+
+1. ‘좋아요’ 기능에서 ‘좋아요를 언제 했는지’에 대한 정보가 필요한 순간 테이블에 추가 정보가 필요하게 됩니다. 만약, 테이블에 필드를 추가할 경우 ‘좋아요’에 대한 객체가 없는 상황에서 JPA에서는 이 필드를 처리하기 힘들어지게 됩니다.
+2. 엔티티를 통해 생성한 것이 아니라 숨겨져 있기 때문에 예상치 못한 쿼리가 발생할 수 있습니다.
+
+### **ManyToMany 한계 극복 방법**
+
+ManyToMany 한계를 극복하는 방법으로 ManyToOne과 OneToMany를 이용하여 일대다, 다대일로 풀어주는 것 입니다.
+
+![Spring Data JPA ManyToMany Divide ERD]({{site.url}}/assets/img/JPA3/10_MANYTOMANY_MANYTOONE_ONETOMANY_ERD.png)
+
+**Member.java**
+
+```java
+@Getter
+@Entity(name = "tb_member")
+@NoArgsConstructor
+public class Member {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Comment("PK")
+  private Long memberNo;
+  
+  ...
+  
+  @OneToMany(mappedBy = "member")
+  private List<BoardLike> boardLikes = new ArrayList<>();
+
+  ...
+
+}
+```
+
+**Board.java**
+
+```java
+@Entity(name = "tb_board")
+@Comment("게시판")
+@Getter
+@ToString
+@NoArgsConstructor
+public class Board {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Comment("PK")
+  private Long id;
+  
+  ...
+  
+}
+```
+
+**BoardLike.java**
+
+```java
+@Entity(name = "tb_board_like")
+@Getter
+@NoArgsConstructor
+public class BoardLike {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Comment("PK")
+  private Long likeId;
+
+  @Comment("사용자FK")
+  @ManyToOne
+  @JoinColumn(
+      name = "memberNo",
+      foreignKey = @ForeignKey(name = "boardlike_member_fk")
+  )
+  private Member member;
+
+  @Comment("게시판FK")
+  @ManyToOne
+  @JoinColumn(
+      name = "id",
+      foreignKey = @ForeignKey(name = "boardlike_board_fk")
+  )
+  private Board board;
+
+  @Comment("좋아요_일시")
+  private LocalDateTime likeDate;
+
+  ...
+
+}
+```
+
+**ManyToOne, OneToMany 테스트 결과**
+![Spring Data JPA ManyToMany 관계 테이블]({{site.url}}/assets/img/JPA3/11_MANYTOMANY_BOARDLIKE_TABLE.png)
+
+### **복합키를 통한 관계 테이블 생성**
+
+관계 테이블을 설정할 때 Embaddable & EmbaddedId와 IdClass를 이용해 복합키 생성이 가능합니다.
+
+![Spring Data JPA ManyToMany 관계 테이블]({{site.url}}/assets/img/JPA3/12_MANYTOMANY_MANYTOONE_ONETOMANY_ERD2.png)
+
+### **1) Embaddable 및 EmbaddedId를 통한 복합키 생성**
+
+Embaddable 및 EmbaddedId의 IdClass 방식과 다르게 경우 복합키를 하나의 객체로 취급할 수 있어 객체지향 방식에 더 가깝습니다. 
+
+아래 코드를 예로 들어 게시판 데이터 조회시 **`boardLike.getBoardLikeId().getId();`{: .text-blue }**와 같이 사용해야합니다.
+
+**Embaddable 사용시**
+
+- Serializable을 implements 해야합니다. (MappingException 발생 가능성 있음)
+- equals, hashCode를 구현해야 합니다. (Lombok에 EqualsAndHashCode 애너테이션 이용)
+  - 영속성 컨텍스트에 엔티티를 보관할때 식별자를 키로 사용하는데 Long, String과 같은 단일 식별자의 경우 문제가 없지만, 복합키의 경우 식별자 구분을 위해 동등성을 비교할 수 있도록 하기 위함입니다.
+- 연관관계를 맺을 때 복합키 Class의 필드명 Entity Class에 필드명이 다를 경우 **`@MapsId("\{복합키클래스 필드명}")`{: .text-blue }**을 이용해 매핑할 수 있습니다.
+
+**BoardLikeId.java**
+
+```java
+@Embeddable
+@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+public class BoardLikeId implements Serializable {
+
+  private Long memberNo;
+  private Long id;
+
+}
+```
+
+**BoardLike.java**
+
+```java
+@Entity(name = "tb_board_like")
+@Getter
+@NoArgsConstructor
+public class BoardLike {
+
+  @EmbeddedId
+  private BoardLikeId boardLikeId;
+
+  @Comment("사용자FK")
+  @ManyToOne
+  @JoinColumn(
+      name = "memberNo",  // -> BoardLikeId의 memberNo
+      foreignKey = @ForeignKey(name = "boardlike_member_fk"),
+      insertable = false, updatable = false
+  )
+  private Member member;
+
+  @Comment("게시판FK")
+  @ManyToOne
+  @JoinColumn(
+      name = "id",  // -> BoardLikeId의 id
+      foreignKey = @ForeignKey(name = "boardlike_board_fk"),
+      insertable = false, updatable = false
+  )
+  private Board board;
+
+  @Comment("좋아요_일시")
+  private LocalDateTime likeDate;
+
+  ...
+
+}
+```
+
+![Spring Data JPA 복합키 및 외래키 결과]({{site.url}}/assets/img/JPA3/13_COMPOSITE_PK_RESULLT.png)
+
+### **2) IdClass를 통한 복합키 생성**
+
+IdClass를 이용한 방식은 복합키 클래스를 지정해두고 두 클래스간 필드명을 같게하여 @Id를 사용해 매핑하는 방식으로 RDS에 가까운 방법입니다.
+
+**IdClass 사용시**
+
+- Serializable을 implements 해야합니다. (MappingException 발생 가능성 있음)
+- equals, hashCode를 구현해야 합니다. (Lombok에 EqualsAndHashCode 애너테이션 이용)
+  - 영속성 컨텍스트에 엔티티를 보관할때 식별자를 키로 사용하는데 Long, String과 같은 단일 식별자의 경우 문제가 없지만, 복합키의 경우 식별자 구분을 위해 동등성을 비교할 수 있도록 하기 위함입니다.
+- Entity Class와 필드와 동일한 필드를 선언해야 합니다.
+
+**BoardLikeId.java**
+
+```java
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+public class BoardLikeId {
+
+  private Member member;
+  private Board board;
+
+}
+```
+
+**BoardLike.java**
+
+```java
+@Entity(name = "tb_board_like")
+@Getter
+@NoArgsConstructor
+@IdClass(BoardLikeId.class)
+public class BoardLike {
+
+  @Id
+  @Comment("사용자FK")
+  @ManyToOne
+  @JoinColumn(
+      name = "memberNo",
+      foreignKey = @ForeignKey(name = "boardlike_member_fk"),
+      insertable = false, updatable = false
+  )
+  private Member member;
+
+  @Id
+  @Comment("게시판FK")
+  @ManyToOne
+  @JoinColumn(
+      name = "id",
+      foreignKey = @ForeignKey(name = "boardlike_board_fk"),
+      insertable = false, updatable = false
+  )
+  private Board board;
+
+  @Comment("좋아요_일시")
+  private LocalDateTime likeDate;
+
+  ...
+
+}
+```
+
+- BoardLikeId에서 컬럼을 필드로 지정하는 것이 아닌, 연관관계를 맺을 엔티티를 필드로 선언해줍니다.
+- BoardLike에는 @IdClass(BoardLikeId.java)를 추가해 복합키를 지정해주시면되고 BoardLikeId에서 선언한 필드에 맞는 객체에 @Id 애너테이션을 추가하면 됩니다.
+- JoinColumn에 name 값에 따라 BradLike 테이블의 컬럼명이 지정됩니다.
 
 ## **즉시로딩과 지연로딩**
 
