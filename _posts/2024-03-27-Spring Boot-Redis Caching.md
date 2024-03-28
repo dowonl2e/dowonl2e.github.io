@@ -1,7 +1,7 @@
 ---
 title: Spring Boot Redis Caching 해보기
 # author: dowonl2e
-date: 2024-03-25 13:20:00 +0800
+date: 2024-03-28 15:30:00 +0800
 categories: [Spring, Redis]
 tags: [Spring Boot, JPA, Spring Data JPA, Querydsl, Redis, Lettuce]
 pin: true
