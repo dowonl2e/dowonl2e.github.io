@@ -1,5 +1,5 @@
 ---
-title: Redis Master / Replica(Slave), Sentinel, AOF With Docker
+title: Redis Master/Replica(Slave), Sentinel, AOF With Docker
 # author: dowonl2e
 date: 2024-03-25 13:20:00 +0800
 categories: [Redis]
