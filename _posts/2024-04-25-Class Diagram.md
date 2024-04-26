@@ -1,5 +1,5 @@
 ---
-title: 헷갈려서 정리해본 클래스 다이어그램(Class Diagram)
+title: 클래스 다이어그램(Class Diagram) 정리
 # author: dowonl2e
 date: 2024-04-25 14:30:00 +0800
 categories: [Diagram, Class Diagram]
