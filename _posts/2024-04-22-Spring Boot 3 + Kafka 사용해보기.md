@@ -175,6 +175,8 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      transactional:
+        id: kafka-stock-id
 ```
 
 **KafkaProducerInterceptor.java**
@@ -278,6 +280,12 @@ public class KafkaProducerConfig {
   @Value("${spring.kafka.bootstrap-servers}")
   private String bootstrapServers;
 
+  @Value("${spring.kafka.producer.key-serializer}")
+  private String keySerializer;
+
+  @Value("${spring.kafka.producer.value-serializer}")
+  private String valueSerializer;
+
   private final KafkaProducerInterceptor producerInterceptor;
   private final KafkaProducerListener producerListener;
   
@@ -293,8 +301,8 @@ public class KafkaProducerConfig {
   public ProducerFactory<String, Map<String, Object>> producerFactory() {
     Map<String, Object> configs = new HashMap<>();
     configs.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-    configs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    configs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+    configs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializer);
+    configs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializer);
 
     DefaultKafkaProducerFactory<String, Map<String, Object>> producerFactory = new DefaultKafkaProducerFactory<>(configs);
     return producerFactory;
@@ -419,6 +427,15 @@ public class KafkaConsumerConfig {
 
   @Value("${spring.kafka.bootstrap-servers}")
   private String bootstrapServers;
+  
+  @Value("${spring.kafka.consumer.auto-offset-reset}")
+  private String autoOffsetReset;
+
+  @Value("${spring.kafka.consumer.key-deserializer}")
+  private String keyDeserializer;
+
+  @Value("${spring.kafka.consumer.value-deserializer}")
+  private String valueDeserializer;
 
   /**
    * Kafka Listener Container를 생성하고 구성하는 인터페이스로, Kafka Consumer의 동작을 제어하기 위해 사용됩니다.
@@ -447,18 +464,16 @@ public class KafkaConsumerConfig {
    */
   @Bean
   public ConsumerFactory<String, Map<String, Object>> consumerFactory() {
-    return new DefaultKafkaConsumerFactory<>(
-        consumerConfig(),
-        new StringDeserializer(),
-        new JsonDeserializer<>());
+    return new DefaultKafkaConsumerFactory<>(consumerConfig());
   }
 
   @Bean
   public Map<String, Object> consumerConfig() {
     Map<String, Object> props = new HashMap<>();
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, keyDeserializer);
+    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, valueDeserializer);
+    props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
     return props;
   }
 }
@@ -470,21 +485,20 @@ public class KafkaConsumerConfig {
   - **AckMode.BATCH** : Consumer는 일괄 처리된 메시지의 그룹이 처리될 때마다 Broker에게 ACK를 전송합니다. 이 모드에서는 메시지 처리의 효율성을 높일 수 있지만, 일괄 처리되는 메시지의 크기와 처리 지연을 고려해야 합니다.
   - **AckMode.MANUAL** : Consumer는 메시지 처리 후에 명시적으로 ACK 또는 NACK를 전송합니다. 이 모드에서는 메시지 처리를 완료한 후에만 ACK를 보내므로 메시지 손실을 줄일 수 있습니다. 하지만 개발자가 ACK를 관리해야 하므로 처리 로직에 복잡성이 추가됩니다.
 
-**StocsConsumer.java**
+**StockConsumerListener.java**
 
 ```java
 @Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
-public class StockConsumer {
+public class StockConsumerListener implements AcknowledgingMessageListener<String, Map<String, Object>> {
 
   private static final String REQUEST_TOPIC = "stock-valid-request";
 
   private final ProductRepository productRepository;
 
-  @Transactional
   @KafkaListener(groupId = "order-product", topics = REQUEST_TOPIC, containerFactory = "kafkaListenerContainerFactory")
-  public void receiveProductCheckResponse(ConsumerRecord<String, Map<String, Object>> record) {
+  public void onMessage(ConsumerRecord<String, Map<String, Object>> record, Acknowledgment ack) {
     Map<String, Object> map = record.value();
     try {
       if(map != null && map.get("productId") != null && map.get("orderCount") != null && (Integer) map.get("orderCount") > 0){
@@ -500,6 +514,7 @@ public class StockConsumer {
         if (product != null && product.getProductCount() != null && product.getProductCount() >= orderCount) {
           product.updateProductCount(product.getProductCount() - orderCount);
         }
+        ack.acknowledge(); //Offset Commit(커밋 시기를 수동으로 제어)
       }
     }
     catch (Exception e){
@@ -576,15 +591,21 @@ Producer 트랜잭션 롤백 처리를 위해 설정에 아래와 같이 트랜�
 **KafkaProducerConfig.java**
 
 ```java
+
+...
+
+@Value("${spring.kafka.producer.transactional.id}")
+private String transactionalId;
+
 @Bean
 public ProducerFactory<String, Map<String, Object>> producerFactory() {
   Map<String, Object> configs = new HashMap<>();
   configs.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-  configs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-  configs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+  configs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializer);
+  configs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializer);
   
   //추가
-  configs.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "kafka-order-id");  //Producer factory does not support transactions 오류 발생 해결법
+  configs.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, transactionalId);  //Producer factory does not support transactions 오류 발생 해결법
 
   DefaultKafkaProducerFactory<String, Map<String, Object>> producerFactory = new DefaultKafkaProducerFactory<>(configs);
   return producerFactory;
@@ -597,7 +618,7 @@ public KafkaTemplate<String, Map<String, Object>> kafkaTemplate() {
   kafkaTemplate.setProducerListener(producerListener);
   
   //추가
-  kafkaTemplate.setTransactionIdPrefix("kafka-order-id-tx-");
+  kafkaTemplate.setTransactionIdPrefix(transactionalId+"-tx-");
   
   return kafkaTemplate;
 }
@@ -635,6 +656,9 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      transactional:
+        id: kafka-product-id
+
 ```
 
 **KafkaProducerConfig.java 생성**
@@ -648,6 +672,15 @@ public class KafkaProducerConfig {
 
   @Value("${spring.kafka.bootstrap-servers}")
   private String bootstrapServers;
+
+  @Value("${spring.kafka.producer.key-serializer}")
+  private String keySerializer;
+
+  @Value("${spring.kafka.producer.value-serializer}")
+  private String valueSerializer;
+
+  @Value("${spring.kafka.producer.transactional.id}")
+  private String transactionalId;
 
   private final KafkaProducerInterceptor producerInterceptor;
   private final KafkaProducerListener producerListener;
@@ -667,9 +700,10 @@ public class KafkaProducerConfig {
   public ProducerFactory<String, Map<String, Object>> producerFactory() {
     Map<String, Object> configs = new HashMap<>();
     configs.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-    configs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    configs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-    configs.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "kafka-stock-id");  //Producer factory does not support transactions 오류 발생 해결법
+    configs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializer);
+    configs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializer);
+    
+    configs.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, transactionalId);  //Producer factory does not support transactions 오류 발생 해결법
 
     DefaultKafkaProducerFactory<String, Map<String, Object>> producerFactory = new DefaultKafkaProducerFactory<>(configs);
     return producerFactory;
@@ -689,13 +723,13 @@ public class KafkaProducerConfig {
     KafkaTemplate<String, Map<String, Object>> kafkaTemplate = new KafkaTemplate<>(producerFactory());
     kafkaTemplate.setProducerInterceptor(producerInterceptor);
     kafkaTemplate.setProducerListener(producerListener);
-    kafkaTemplate.setTransactionIdPrefix("kafka-stock-id-tx-");
+    kafkaTemplate.setTransactionIdPrefix(transactionalId+"-tx-");
     return kafkaTemplate;
   }
 }
 ```
 
-**StockConsumer.java 수정**
+**StockConsumerListener.java 수정**
 
 ```java
 
@@ -710,7 +744,7 @@ private final ObjectMapper objectMapper;
 
 @Transactional
 @KafkaListener(groupId = "order-product", topics = REQUEST_TOPIC, containerFactory = "kafkaListenerContainerFactory")
-public void receiveProductCheckResponse(ConsumerRecord<String, Map<String, Object>> record) {
+public void onMessage(ConsumerRecord<String, Map<String, Object>> record, Acknowledgment ack) {
   log.info("Order Product Consumer receiveProductCheckResponse -> {}" + record.value());
   Map<String, Object> map = record.value();
   //추가
@@ -727,6 +761,7 @@ public void receiveProductCheckResponse(ConsumerRecord<String, Map<String, Objec
         response = ResponseDto.toResponse(HttpStatus.OK, map);
       }
     }
+    ack.acknowledge(); //Offset Commit(커밋 시기를 수동으로 제어)
   }
   catch (Exception e){
     e.printStackTrace();
@@ -796,6 +831,15 @@ public class KafkaConsumerConfig {
   @Value("${spring.kafka.bootstrap-servers}")
   private String bootstrapServers;
 
+  @Value("${spring.kafka.consumer.auto-offset-reset}")
+  private String autoOffsetReset;
+
+  @Value("${spring.kafka.consumer.key-deserializer}")
+  private String keyDeserializer;
+
+  @Value("${spring.kafka.consumer.value-deserializer}")
+  private String valueDeserializer;
+
   @Bean
   public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, Map<String, Object>>> kafkaListenerContainerFactory() {
     ConcurrentKafkaListenerContainerFactory<String, Map<String, Object>> factory = new ConcurrentKafkaListenerContainerFactory<>();
@@ -807,32 +851,29 @@ public class KafkaConsumerConfig {
 
   @Bean
   public ConsumerFactory<String, Map<String, Object>> consumerFactory() {
-    return new DefaultKafkaConsumerFactory<>(
-        consumerConfig(),
-        new StringDeserializer(),
-        new JsonDeserializer<>());
+    return new DefaultKafkaConsumerFactory<>(consumerConfig());
   }
 
   @Bean
   public Map<String, Object> consumerConfig() {
     Map<String, Object> props = new HashMap<>();
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, keyDeserializer);
+    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, valueDeserializer);
+    props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
     props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, READ_COMMITTED.toString().toLowerCase(Locale.ROOT));
     return props;
   }
 }
 ```
 
-**StockConsumer.java 생성**
+**StockConsumerListener.java 생성**
 
 ```java
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
-public class StockConsumer {
+public class StockConsumerListener implements AcknowledgingMessageListener<String, Map<String, Object>> {
 
   private static final String RESPONSE_TOPIC = "stock-valid-response";
 
@@ -853,6 +894,7 @@ public class StockConsumer {
       if (statusCode != 200 && data.get("orderId") != null) {
         orderRepository.deleteById((String) data.get("orderId"));
       }
+      ack.acknowledge(); //Offset Commit(커밋 시기를 수동으로 제어)
     }
     catch (Exception e){
       e.printStackTrace();
@@ -886,3 +928,174 @@ public class StockConsumer {
 ![재고 처리 후 Kafka UI 응답 실패 데이터 확인]({{site.url}}/assets/img/Spring-Boot-Kafka/24_KAFKA_RESPONSE_FAIL_UI2.png)
 
 로그를 확인하면 주문 서비스 Consumer에서 토픽으로 부터 응답 데이터를 읽어 응답 코드에 따라 기존 주문건 삭제처리가 된 것을 확인하실 수 있습니다.
+
+## **트러블 슈팅**
+
+### **문제**
+
+Kafka에서 Consumer를 테스트 과정에서 만약 Consumer 서비스에서 장애가 발생해 서버가 다운되었다는 가정하에 Consumer 서비스를 재시작했는데 해당 Topic의 메시지를 다시 읽어 실행했다.
+
+![Kafka UI]({{site.url}}/assets/img/Spring-Boot-Kafka/25_KAFKA-UI.png)
+
+1개 메시지가 현재 요청된 상태이고 Consumer는 이미 해당 메시지를 처리했지만, 재시작되면서 다시 요청을 읽어 처리되었다.
+
+### **원인 파악**
+
+Consumer의 경우 메시지를 구독하는 기준은 offset이기에 offset에 관련 내용에서 아래 2가지 경우에 대해 생각했다.
+
+- **auto.offset.reset 확인** : auto.offset.reset 설정의 경우 offset 오류 (Consumer가 Topic의 Offset 정보를 가지고 있지 않음)의 경우 발생한다.
+- **Consumer Lag 확인** : Consumer Lag는 Producer의 전송 속도가 Consumer가 구독하여 처리하는 속도보다 빠르다면 Consumer가 마지막으로 읽은 offset과 Producer가 마지막으로 넣은 offset의 차이이다.
+
+### **원인 확인**
+
+위 2가지 예상 원인에 대해 **`Kafka UI`{: .text-blue}** 혹은 **`Burrow`{: .text-blue}**로 Offset의 여부 확인
+
+**Kafka UI**
+
+![Kafka Offset Test UI]({{site.url}}/assets/img/Spring-Boot-Kafka/26_OFFSET_TEST_KAFKA-UI.png)
+
+→ 재고 확인 요청에 대한 토픽(stock-valid-request)의 경우 Consumer Lag의 값이 0으로 확인된다.
+
+**Burrow Data**
+
+![Burrow Consumer Data]({{site.url}}/assets/img/Spring-Boot-Kafka/27_BURROW_CONSUMMER_JSON_DATA.png)
+
+→ Burrow에서 Consumer를 확인했을 때 **`stock-valid-request`{: .text-blue}** 토픽 정보가 없음
+
+→ Consumer Lag의 경우 Offset이 있어야하기에 연관이 없다고 판단
+
+**auto.offset.reset** 현재 설정되어있는 값은 **`earliest`{: .text-blue}**이기에 해당 오류 발생시 처음부터 다시 읽어서 발생하는 것으로 확인되어 왜 Offset이 없는지에 대해 다시 확인이 필요하다.
+
+### **왜?**
+
+**AckMode 설정으로 인한 Offset 커밋 누락**
+
+원인에 대해 찾다보니 AckMode와 Offset이 어떤 연관이 있는지 몰랐었다… 
+
+AckMode에 정리한 내용을 보면서  **`MANUAL_IMMEDIATE`{: .text-blue}** 의 설정은  **`AcknowledgingMessageListener`{: .text-blue}**를 통해 **`acknowledge()`{: .text-blue}** 메서드를 호출한 즉시 커밋한다. 관련된 부분들을 따라가다보면 **KafaMessageListenerContainer.class**에 아래 메서드를 볼 수 있다.
+
+```java
+private void ackImmediate(ConsumerRecord<K, V> cRecord) {
+  Map<TopicPartition, OffsetAndMetadata> commits = Collections.singletonMap(new TopicPartition(cRecord.topic(), cRecord.partition()), this.createOffsetAndMetadata(cRecord.offset() + 1L));
+  this.commitLogger.log(() -> {
+    return "Committing: " + commits;
+  });
+  if (this.producer != null) {
+    this.doSendOffsets(this.producer, commits);
+  } else if (this.syncCommits) {
+    this.commitSync(commits);
+  } else {
+    this.commitAsync(commits);
+  }
+}
+```
+
+commits 객체에서 offset 메타데이터를 설정하고 해당 설정에 대해서 Offset을 증가시키는 것을 볼 수 있다. 결국, **`acknowledge`{: .text-blue}**를 호출하지 않아 발생했다.
+
+### **문제의 Consumer 코드**
+
+```java
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class StockConsumerListener {
+
+  private static final String REQUEST_TOPIC = "stock-valid-request";
+
+  private final ProductRepository productRepository;
+
+  private final KafkaTemplate<String, Map<String, Object>> kafkaTemplate;
+
+  private final ObjectMapper objectMapper;
+
+
+  @Transactional
+  @KafkaListener(groupId = "order-product", topics = REQUEST_TOPIC, containerFactory = "kafkaListenerContainerFactory")
+  public void onMessage(ConsumerRecord<String, Map<String, Object>> record) {
+    Map<String, Object> map = record.value();
+    try {
+      if(map != null && map.get("productId") != null && map.get("orderCount") != null && (Integer) map.get("orderCount") > 0){
+        Integer orderCount = (Integer) map.get("orderCount");
+        /*
+          Producer에서 발송한 값의 타입이 Long 이지만, 
+          Consumer에서 값을 받을 때 Long으로 변환이 불가능하여 String변환 후 Long으로 변환
+        */
+        Long productId = Long.parseLong(String.valueOf(map.get("productId")));
+
+        //Dirty Checking 재고량 감소
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product != null && product.getProductCount() != null && product.getProductCount() >= orderCount) {
+          product.updateProductCount(product.getProductCount() - orderCount);
+        }
+      }
+    }
+    catch (Exception e){
+      e.printStackTrace();
+    }
+    kafkaTemplate.send(RESPONSE_TOPIC, objectMapper.convertValue(response, Map.class));
+  }
+}
+```
+
+### **처리 후 Consumer 코드**
+
+```java
+@Slf4j
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class StockConsumerListener implements AcknowledgingMessageListener<String, Map<String, Object>> {
+
+  private static final String REQUEST_TOPIC = "stock-valid-request";
+
+  private final ProductRepository productRepository;
+
+  private final KafkaTemplate<String, Map<String, Object>> kafkaTemplate;
+
+  private final ObjectMapper objectMapper;
+
+  @Transactional
+  @KafkaListener(groupId = "order-product", topics = REQUEST_TOPIC, containerFactory = "kafkaListenerContainerFactory")
+  public void onMessage(ConsumerRecord<String, Map<String, Object>> record, Acknowledgment ack) {
+    Map<String, Object> map = record.value();
+    try {
+      if(map != null && map.get("productId") != null && map.get("orderCount") != null && (Integer) map.get("orderCount") > 0){
+        Integer orderCount = (Integer) map.get("orderCount");
+        /*
+          Producer에서 발송한 값의 타입이 Long 이지만, 
+          Consumer에서 값을 받을 때 Long으로 변환이 불가능하여 String변환 후 Long으로 변환
+        */
+        Long productId = Long.parseLong(String.valueOf(map.get("productId")));
+
+        //Dirty Checking 재고량 감소
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product != null && product.getProductCount() != null && product.getProductCount() >= orderCount) {
+          product.updateProductCount(product.getProductCount() - orderCount);
+        }
+        ack.acknowledge();
+      }
+    }
+    catch (Exception e){
+      e.printStackTrace();
+    }
+    kafkaTemplate.send(RESPONSE_TOPIC, objectMapper.convertValue(response, Map.class));
+  }
+}
+```
+
+### **처리 결과**
+
+![Burrow Consumer Ok Data]({{site.url}}/assets/img/Spring-Boot-Kafka/28_BURROW_CONSUMER_OK_DATA.png)
+
+stock-valid-request 토픽과 Offset 정보가 정상적으로 확인된다.
+
+Consumer 서비스를 재시작해도 더이상 전체 메시지를 구독하여 처리하지 않는다.
+
+### **추가 확인 사항**
+
+Spring Kafka의 Consumer 설정 중 Commit과 관련된 설정이 있다.
+
+- enable.auto.commit : Auto-Commit 여부 **(default : true)**
+- auto.commit.interval.ms : Auto-Commit 사용 시 Commit을 수행할 시간(ms) **(defaut : 5000)**
+
+자동 커밋이 기본으로 설정이 되어이지만 **`MANUAL_IMMEDIATE`{: .text-blue}** 의 경우 위 옵션이 동작하지 않고 수동으로 커밋 메서드를 호출해야한다.
