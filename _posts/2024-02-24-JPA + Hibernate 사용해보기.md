@@ -229,7 +229,7 @@ public void testToSave(){
 
 **테스트 결과**
 
-![JPA Insert]({{site.url}}/assets/img/JPA/6_JPA Insert.png)
+![JPA Insert]({{site.url}}/assets/img/JPA/6_JPA_Insert.png)
 
 ### **2) 데이터 조회**
 
