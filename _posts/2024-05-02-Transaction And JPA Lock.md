@@ -1,7 +1,7 @@
 ---
-title: 트랜잭션 낙관적/비관적 락
+title: Lock, Transaction Isolation Level, JPA 낙관적/비관적 락
 # author: dowonl2e
-date: 2024-04-25 14:30:00 +0800
+date: 2024-05-02 14:30:00 +0800
 categories: [Transaction, Lock]
 tags: [Transaction, Lock, JPA]
 pin: true
