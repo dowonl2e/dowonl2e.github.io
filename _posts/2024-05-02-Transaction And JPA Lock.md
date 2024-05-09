@@ -11,11 +11,9 @@ pin: true
 
 위 글에서 JPA 트랜잭션에 대해 간단하게 정리했었다. 이번에는 세부적인 내용을 이해하기 위해 **`락(Lock)`{: .text-blue}**, **`트랜잭션 격리 수준(Transaction Isolatin Level)`{: .text-blue}**, JPA에서의 **`낙관적 락(Optimistic Lock), 비관적 락(Pessimistic Lock)`{: .text-blue}**에 대한 내용을 적어봅니다.
 
-# **Lock**
+## **Lock**
 
 Lock은 DB에서 여러 트랜잭션 간에 데이터의 일관성을 유지하기 위해 필요한 매커니즘이다. 동시에 같은 데이터를 읽거나 수정할 때 발생할 수 있는 문제를 방지하기 위해 사용한다. 
-
-## **Lock의 종류**
 
 ### **공유 락(Shared Lock)**
 
@@ -45,13 +43,13 @@ Lock은 DB에서 여러 트랜잭션 간에 데이터의 일관성을 유지하�
 - 두 개 이상의 트랜잭션이 각자의 락을 획득하고, 서로 상대방의 락을 기다릴 때 발생한다.
 - 서로의 락을 기다리는 상황에서 각 트랜잭션이 상대방이 소유한 락을 대기하며, 둘 다 락을 획득하지 못한 채 영원히 대기할 수 있다.
 
-# **트랜잭션 격리 수준(Transaction Isolation Level)**
+## **트랜잭션 격리 수준(Transaction Isolation Level)**
 
 트랜잭션 격리 수준은 여러 트랜잭션이 동시에 실행될 때 서로의 간섭을 최소화 하기 위해 제공하는 격리 수준이다. 트랜잭션 특성이 ACID(Atomicity, Consistency, Isolation, Durability) 중 Isolation에 해당되며, 각 트랜잭션이 다른 트랜잭션에 영향을 미치지 않고 독립적으로 실행되도록 보장하는 것을 말한다.
 
-## **격리 수준에 따른 일관성 문제**
+### **격리 수준에 따른 일관성 문제**
 
-### **Dirty Read**
+#### **Dirty Read**
 
 특정 트랜잭션의 작업이 커밋되지 않은 상태에서 다른 트랜잭션이 작업한 데이터를 읽는 현상을 말한다. 
 
@@ -61,7 +59,7 @@ Lock은 DB에서 여러 트랜잭션 간에 데이터의 일관성을 유지하�
 
 트랜잭션이 데이터를 수정한 후 롤백되어 변경 내용이 취소되었지만, 다른 트랜잭션은 변경된 내용을 계속 가지게되어 데이터의 일관성을 깨뜨리는 문제를 발생시킬 수 있다.
 
-### **Non-repeatable Read**
+#### **Non-repeatable Read**
 
 한 트랜잭션에서 동일한 데이터를 연속적으로 읽을 때, 첫 번째 데이터를 읽고 두 번째 데이터를 읽기 전 다른 트랜잭션에 의해 해당 데이터의 변경 작업이 발생해 두 데이터는 서로 다른 상황을 말한다.
 
@@ -69,7 +67,7 @@ Lock은 DB에서 여러 트랜잭션 간에 데이터의 일관성을 유지하�
 
 이 경우 서로 다른 값이기에 데이터 일관성이 깨지게 된다.
 
-### **Phantom Read**
+#### **Phantom Read**
 
 한 트랜잭션에서 N개의 데이터를 조회하는 쿼리를 여러번 실행할 때, 첫 번째 쿼리를 실행하고 두 번째 쿼리를 실행하기 전 다른 트랜잭션에 의해 데이터가 추가/삭제가 발생할 수 있다. 이 때 첫 번째 쿼리 결과의 집합과 두 번째 쿼리 결과의 집합이 다른 경우를 의미한다.
 
@@ -77,9 +75,9 @@ Lock은 DB에서 여러 트랜잭션 간에 데이터의 일관성을 유지하�
 
 이는 트랜잭션이 같은 범위를 조회하는 동안에도 데이터의 일관성이 보장되지 않는 것을 의미한다.
 
-## **격리 수준 종류**
+### **격리 수준 종류**
 
-### **SERIALIZABLE**
+#### **SERIALIZABLE**
 
 가장 높은 격리 수준으로 모든 트랜잭션을 순차적으로 실행한다. 순차적인 실행으로 대상 레코드에 대해 여러 트랜잭션이 동시에 접근할 수 없어 가장 안전하지만 동시 처리 성능이 매우 떨어진다.
 
@@ -87,7 +85,7 @@ Lock은 DB에서 여러 트랜잭션 간에 데이터의 일관성을 유지하�
 
 **`Dirty Read`{: .text-blue}**, **`Non-repeatable Read`{: .text-blue}**, **`Phantom Read`{: .text-blue}** 등의 문제가 발생하지 않지만, 동시성이 가장 낮다.
 
-### **REPEATABLE READ**
+#### **REPEATABLE READ**
 
 한 번 읽은 데이터를 트랜잭션이 종료될 때 까지 계속해서 동일한 값을 읽을 수 있다.
 
@@ -95,7 +93,7 @@ RDBMS에서 변경 전 레코드를 백업 하기에 **변경 전/후의 데이�
 
 이를 통해 서로 다른 트랜잭션 간에 접근할 수 있는 데이터 제어가 가능하다. 각각의 트랜잭션은 순차적으로 증가하는 **고유 번호가 있어 백업 레코드에는 어느 트랜잭션에 의해 백업되었는지 고유 번호를 함께 저장된다.**
 
-### **REPEATABLE READ와 Phantom Read**
+#### **REPEATABLE READ와 Phantom Read**
 
 MySQL의 경우 기본 격리 수준은 **REPEATABLE READ**이다. **REPEATABLE READ**는 레코드 추가에 대해서는 막지 않기에 **`Phantom Read`{: .text-blue}** 문제가 발생할 수 있지만, **`MVCC`{: .text-blue}**로 인해서 발생하지 않는다.
 
@@ -118,7 +116,7 @@ A 트랜잭션(5), B 트랜잭션(6)에서 5번이 먼저 실행되면 **REPEATA
 
 따라서 **SELECT FOR UPDATE**와 **SELECT FOR SHARE**의 경우 테이블의 레코드를 가져오게 되므로 COMMIT된 레코드도 모두 가져오게 되고, 결국 **`Phantom Read`{: .text-blue}**가 발생한다.
 
-### **갭 락(Gap Lock)**
+#### **갭 락(Gap Lock)**
 
 위에서 **`갭 락(Gap Lock)`{: .text-blue}**이 언급되었는데, 갭 락은 MySQL에서 사용되는 특정 유형의 매커니즘이다. 트랜잭션 동안 쿼리간 범위에 존재하는 간격을 잠그는데 사용된다.
 
@@ -128,7 +126,7 @@ A 트랜잭션(5), B 트랜잭션(6)에서 5번이 먼저 실행되면 **REPEATA
 
 따라서, MySQL은 **REPEATABLE READ** 격리 수준에서 **`갭 락(Gap Lock)`{: .text-blue}**으로 인해 **Phantom Read**가 발생하지 않는다. 이 경우는 다른 트랜잭션에서 데이터 추가 전에 **배타적 락(SELECT FOR UPDATE)** 혹은 **공유 락(SELECT FOR SHARE)**을 이용해야 가능하기에 일반적인 SELECT 구문을 이용한 경우에는 **Phantom Read**는 발생하게 된다.
 
-### **REPEATABLE READ에서 Phantom Read가 발생하는 케이스**
+#### **REPEATABLE READ에서 Phantom Read가 발생하는 케이스**
 
 <table>
   <colgroup>
@@ -161,7 +159,7 @@ A 트랜잭션(5), B 트랜잭션(6)에서 5번이 먼저 실행되면 **REPEATA
   </tbody>
 </table>
 
-### **READ COMMITTED**
+#### **READ COMMITTED**
 
 READ COMMITTED는 반복 읽기를 수행하면 다른 트랜잭션에 의해 커밋된 내용을 조회하게 된다. **`Dirty Read`{: .text-blue}**는 방지되지만, 다른 트랜잭션의 커밋 여부에 따라 결과가 달라져 데이터의 부정합이 발생할 수 있는 **`Non-repeatable Read`{: .text-blue}** 문제가 발생할 수 있다. 
 
@@ -169,7 +167,7 @@ READ COMMITTED는 반복 읽기를 수행하면 다른 트랜잭션에 의해 �
 
 따라서, 격리 수준을 명확히 알고 결과를 예측할 수 있어야 한다.
 
-### **READ UNCOMMITTED**
+#### **READ UNCOMMITTED**
 
 READ UNCOMMITTED는 가장 낮은 격리 수준이다. 다른 트랜잭션에 의해 커밋되지 않은 작업 내용도 읽을 수 있다. 이러한 점에서 **`Dirty Read`{: .text-blue}**, **`Non-repeatable Read`{: .text-blue}** 등의 문제가 발생할 수 있다.
 
@@ -177,7 +175,7 @@ READ UNCOMMITTED는 가장 낮은 격리 수준이다. 다른 트랜잭션에 �
 
 그래서 **READ UNCOMMITTED**는 RDBMS에는 적합성에 문제가 맞은 격리 수준이며 최소한 **READ UNCOMMITTED**을 사용해야하는 것으로 보인다.
 
-## **트랜잭션 격리 수준 정리**
+### **트랜잭션 격리 수준 정리**
 
 <table>
   <colgroup>
@@ -222,17 +220,17 @@ READ UNCOMMITTED는 가장 낮은 격리 수준이다. 다른 트랜잭션에 �
   </tbody>
 </table>
 
-# **JPA 락(Lock)**
+## **JPA 락(Lock)**
 
 JPA는 DB에 대한 동시 접근으로부터 엔티티에 대한 무결성을 유지할 수 있게 해주는 동시성 제어 매커니즘을 지원해준다. 이 매커니즘은 **`낙관적 락(Optimistic Lock)`{: .text-blue}**과 **`비관적 락(Pessimistic Lock)`{: .text-blue}**이다.
 
-## **낙관적 락(Optimistic Lock)**
+### **낙관적 락(Optimistic Lock)**
 
 특정 자원에 대한 경쟁을 낙관적으로 바라보는 방식으로 **충돌이 일어나지 않을 것이라 가정하에** 여러 트랜잭션의 수정에 대해 충돌을 방지하는 기법이다. 데이터베이스의 락 매커니즘에 의존하지 않으며 애플리케이션 레벨에서 구현 가능하다.
 
 여러 트랜잭션에 동시에 데이터에 접근할 수 있도록 허용한다는 점에서 성능상 이점이 있고 충돌이 일어날 경우 예외를 반환하는 방식으로 동시성 이슈를 해결한다. 하지만, 동시성 충돌이 자주 발생하는 경우에는 성능 저하가 발생한다.
 
-### **낙관적 락 구현**
+#### **낙관적 락 구현**
 
 JPA에는 **`@Version`{: .text-blue}** 어노테이션이 있다. 이를 이용해 엔티티의 **낙관적 락(Optismistic Lock)**을 구현할 수 있다.
 
@@ -279,7 +277,7 @@ public class BoardService {
 }
 ```
 
-### **게시물 데이터 1건 수정 테스트**
+#### **게시물 데이터 1건 수정 테스트**
 
 **테스트 코드**
 
@@ -310,7 +308,7 @@ class JpatransactionApplicationTests {
 
 ![JPA Optimistic Lock Result Data]({{site.url}}/assets/img/Transaction-JPA-Lock/9_JPA_OPTIMISTIC_LOCK_RESULT_DATA.png)
 
-### **게시물 데이터 5건 수정 동시성 테스트**
+#### **게시물 데이터 5건 수정 동시성 테스트**
 
 **테스트 코드**
 
@@ -361,7 +359,7 @@ class JpatransactionApplicationTests {
 
 특정 트랜잭션에서 엔티티가 수정되어 **version**은 1에서 2가 되었다. 이후 다른 트랜잭션에서의 엔티티 **version** 값은 1인 상황에서 엔티티를 수정하려 할 때 이미 특정 트랜잭션에 의해 엔티티가 변경되었기에 오류를 반환하게 된다.
 
-### **낙관적 락(Optimistic Lock) - LockModeType**
+#### **낙관적 락(Optimistic Lock) - LockModeType**
 
 JpaRepository를 사용한다면 @Lock 어노테이션을 이용해 LockModeType를 설정할 수 있다.
 
@@ -404,13 +402,13 @@ public Board findById(Long id){
 
 단순 조회만 했을 뿐인데 버전을 증가시키는 것을 확인할 수 있다.
 
-## **비관적 락(Pessimistic Lock)**
+### **비관적 락(Pessimistic Lock)**
 
 비관적 락은 낙관적 락과 반대로 **여러 트랜잭션이 데이터를 동시에 수정할 것이라고 가정하에** 특정 자원 경쟁을 비관적으로 바라보는 매커니즘이다. 하나의 트랜잭션이 데이터를 읽는 시점에서 락(Lock)을 걸고 조회 혹은 업데이트 처리가 완료될 때 다른 트랜잭션은 대기 상태가 된다.
 
 정리하면, 먼저 락(Lock)을 거는 방식이다. 데이터베이스 트랜잭션 락 매커니즘에 의존하는 방법이며 대표적인 구문으로 **배타적 락(Exclusive Lock)의 SELECT FOR UPDATE**가 있다.
 
-### **두 번의 갱신 분실 문제(Second Lost Updates Problem)**
+#### **두 번의 갱신 분실 문제(Second Lost Updates Problem)**
 
 비관적 락으로 발생가능한 문제로 **`두 번의 갱신 분실 문제`{: .text-blue}**가 있다. 예를 들어 사용자 A와 B가 게시물의 제목을 동시에 수정한 상황을 보면, 두 사용자가 동시에 수정했을 때 A가 요청한 처리가 우선적으로 완료되고 바로 다음에 B의 요청이 처리되었다. 이 경우 A의 수정 내용은 손실되고 B 수정 내용만 남게 된다.
 
@@ -420,11 +418,11 @@ public Board findById(Long id){
 
 갱신 분실 문제에 대해서 3가지 선택 방법이 있는데, 기본은 **마지막 커밋 인정**이다.
 
-### **데드 락(Dead Lock) 문제**
+#### **데드 락(Dead Lock) 문제**
 
 비관적 락의 경우 락(Lock)을 먼저 건다는 것에서 데드락(Dead Lock)의 가능성이 있다. 배타적 락(Exclusive Lock)을 사용할 때의 단점과 같다.
 
-### **비관적 락(Pessimistic Lock) - LockModeType**
+#### **비관적 락(Pessimistic Lock) - LockModeType**
 
 ```java
 @Repository
@@ -487,9 +485,9 @@ public void 비관적락_수정_동시성_테스트() throws Exception {
 
 비관적 락 중 유일하게 버전 정보를 사용한다. 낙관적 락에서와 같이 번정보를 강제로 증가시킨다. Hibernate는 nowait를 지원하는 데이터베이스에 대해서 for update nowait 옵션을 사용한다.
 
-# **정리**
+## **정리**
 
-## **트랜잭션 격리 수준(Transaction Isolation Level)**
+### **트랜잭션 격리 수준(Transaction Isolation Level)**
 
 - 트랜잭션에는 격리 수준이 있으며 DBMS에 따라 기본 격리 수준이 다를 수 있다.
 **트랜잭션 격리 수준에서 일관성 문제로 `Dirty Read`{: .text-blue}**, **`Non-repeatable Read`{: .text-blue}**, **`Phantom Read`{: .text-blue}**가 있다.
@@ -497,13 +495,13 @@ public void 비관적락_수정_동시성_테스트() throws Exception {
 - **SERIALIZE**의 경우 가장 높은 격리 수준으로 일관성 문제는 발생하지 않지만, 그 만큼 성능에 영향이 있다.
 - **REPEATABLE READ**의 경우 DBMS에 따라 **`Phantom Read`{: .text-blue}**가 발생할 수 있지만, MySQL에서는 **`MVCC(Multi-Version Concurrency Control, 다중 버전 동시성 제어)`{: .text-blue}**와 **`배타적 락(Exclusive Lock)`{: .text-blue}**에서의 **`갭 락(Gap Lock)`{: .text-blue}** 으로 **`Phantom Read`{: .text-blue}**가 발생하지 않도록 가능하다.
 
-## **낙관적 락(Optimistic Lock)**
+### **낙관적 락(Optimistic Lock)**
 
 - DB의 트랜잭션 락 매커니즘에 의존하지 않고 애플리케이션 레벨에서 구현 가능하다.
 - 데이터를 변경할 때만 충돌을 확인하기에 여러 사용자가 동시에 데이터를 읽을 수 있는 점에서 비관적 락과 비교해 성능이 좋다.
 - 동시성 이슈가 많이 발생하는 경우 성능이 떨어질 수 있기에 충돌이 발생할 가능성이 낮은 경우에 유용하다.
 
-## **비관적 락(Pessimistic Lock)**
+### **비관적 락(Pessimistic Lock)**
 
 - DB의 트랜잭션 락 매커니즘에 의존한다.
 - 데이터를 읽을 때부터 락을 걸어 트랜잭션이 완료되기 전까지 다른 트랜잭션이 데이터를 변경할 수 없기에 데이터의 일관성을 보장한다.
