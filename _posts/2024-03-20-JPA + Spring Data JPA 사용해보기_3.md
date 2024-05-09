@@ -39,7 +39,7 @@ N개 이상의 테이블에서 모든 가능한 조합을 만들어 결과를 �
 
 ## **Fetch Join**
 
-보편적인 SQL에서 얘기하는 Join은 아니며, JPQL에서 성능 최적화를 위해 제공하는 Join의 종류입니다. `**JOIN FETCH**` 명령어를 통해 사용할 수 있습니다.
+보편적인 SQL에서 얘기하는 Join은 아니며, JPQL에서 성능 최적화를 위해 제공하는 Join의 종류입니다. **`JOIN FETCH`{: .text-blue}** 명령어를 통해 사용할 수 있습니다.
 
 # **Spring Data JPA에서 Join 사용**
 
