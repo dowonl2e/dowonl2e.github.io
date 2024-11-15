@@ -1,7 +1,7 @@
 ---
 title: 대용량 트래픽 경험해보기(7/10) - HikariCP에서 Auto Commit 이슈
 # author: dowonl2e
-date: 2024-11-15 01:00:00 +0800
+date: 2024-11-15 14:00:00 +0800
 categories: [대용량 트래픽]
 tags: [대용량 트래픽, Spring Boot, HikariCP, nGrinder]
 pin: true
