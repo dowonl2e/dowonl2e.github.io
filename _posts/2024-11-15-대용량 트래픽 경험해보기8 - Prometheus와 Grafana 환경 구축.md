@@ -164,9 +164,9 @@ http://{호스트 DNS or IP}:9090 접속 후 Prometheus Target을 확인하면 �
 
 ![Prometheus UI Target Result]({{site.url}}/assets/img/High-Volume-Traffic-8/6-PROMETHEUS_TARGETS.png)
 
-## **Local에서 Docker Grafana 환경 구성**
+## **Docker Grafana 환경 구성**
 
-Grafana의 경우 Prometheus와 같이 환경을 구성하여 환경울 구축할 수 있지만, API 서버와 리소스를 공유하게 되는 점에서 개별 서버로 운영해야 하는데 비용 발생으로 Local에 구축하였다.
+Grafana의 경우 Prometheus와 같이 환경을 구성하여 환경울 구축할 수 있지만, API 서버와 리소스를 공유하게 되는 점에서 개별 서버로 운영해야 하는데 비용 발생으로 **Local 환경**에 구축하였다.
 
 ### **docker-compose 구성**
 
@@ -198,7 +198,7 @@ services:
 
 ### **Dashboard 구성**
 
-**`Home > Dashboards`**에서 대시보드 생성으로 원하는 데이터 패널을 구성하여 Dashboard를 커스터마이징할 수 있다.
+**`Home > Dashboards`**에 Dashboard 추가 시 원하는 데이터 패널을 추가하여 커스터마이징할 수 있다.
 
 ![Grafana Custom Dashboard]({{site.url}}/assets/img/High-Volume-Traffic-8/10-GRAFANA_CUSTOM_UI.png)
 
@@ -226,8 +226,8 @@ Dashboard ID를 복사 후 **`Grafana Dashboard > Import Dashboard 화면`**에�
 
 API 테스트를 진행하면서 리소스 사용에 대한 정보를 보기위해 **`Spring Boot Admin`**, **`Visual VM`**, **`Prometheus & Grafana`** 환경을 구성하여 사용해보았다.
 
-Spring Boot Admin의 경우 Spring Boot 기반 애플리케이션 모니터링에 적합하며 애플리케이션 상태, 다양한 데이터의 메트릭화, Log, JVM Heap Dump 등을 쉽게 확인할 수 있다는 장점이 있다. 하지만, 주요 데이터 외에는 시각화가 부족하다는 점이 있었으며 JVM Heap Dump의 경우 Spring Boot Admin Server용 서버 스팩이 어느정도 갖춰지지 못하면 과도한 부하를 발생시키는 문제가 있다. 
+**Spring Boot Admin**의 경우 Spring Boot 기반 애플리케이션 모니터링에 적합하며 애플리케이션 상태, 다양한 데이터의 메트릭화, Log, JVM Heap Dump 등을 쉽게 확인할 수 있다는 장점이 있다. 하지만, 주요 데이터 외에는 시각화가 부족하다는 점이 있었으며 JVM Heap Dump의 경우 Spring Boot Admin Server용 서버 스팩이 어느정도 갖춰지지 못하면 과도한 부하를 발생시키는 문제가 있다. 
 
-Visual VM은 모니터링 하기에는 부족한 데이터와 애플리케이션에 성능 오버헤드가 발생하여 부하 테스트 과정에서 사용하기에 부적합했다.
+**Visual VM**은 모니터링 하기에는 부족한 데이터와 애플리케이션에 성능 오버헤드가 발생하여 부하 테스트 과정에서 사용하기에 부적합했다.
 
-Prometheus & Grafana는 다양한 데이터를 시각화가 잘되어있고 이슈가 발생한 시점을 쉽게 확인할 수 있으며 알림을 통해 실시간 대응을 할 수 있다는 이점이 있었다. JVM Heap Dump를 할 수 없어 아쉬운 점이 있지만, S3와 연동하여 OOM 발생 혹은 주기적인 Heap Dump를 통한 방법으로 개선할 수 있다.
+**Prometheus & Grafana**는 다양한 데이터를 시각화가 잘되어있고 이슈가 발생한 시점을 쉽게 확인할 수 있으며 알림을 통해 실시간 대응을 할 수 있다는 이점이 있었다. JVM Heap Dump를 할 수 없어 아쉬운 점이 있지만, AWS S3와 연동하여 OOM 발생 혹은 주기적인 Heap Dump로 개선할 수 있다.
