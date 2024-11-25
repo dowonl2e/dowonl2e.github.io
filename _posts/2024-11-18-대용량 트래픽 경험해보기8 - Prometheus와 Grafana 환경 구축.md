@@ -1,5 +1,5 @@
 ---
-title: 대용량 트래픽 경험해보기(8/10) - Prometheus & Grafana 환경 구축
+title: 대용량 트래픽 경험해보기(8/12) - Prometheus & Grafana 환경 구축
 # author: dowonl2e
 date: 2024-11-18 13:00:00 +0800
 categories: [대용량 트래픽]
