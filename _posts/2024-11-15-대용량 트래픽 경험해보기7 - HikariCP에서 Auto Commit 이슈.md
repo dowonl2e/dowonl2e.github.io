@@ -1,5 +1,5 @@
 ---
-title: 대용량 트래픽 경험해보기(7/12) - HikariCP에서 Auto Commit 이슈
+title: 대용량 트래픽 경험해보기(7/14) - HikariCP에서 Auto Commit 이슈
 # author: dowonl2e
 date: 2024-11-15 14:00:00 +0800
 categories: [대용량 트래픽]
