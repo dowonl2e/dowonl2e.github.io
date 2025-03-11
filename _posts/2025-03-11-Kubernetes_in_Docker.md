@@ -9,7 +9,7 @@ pin: true
 
 K8S를 실제 운영서버에 설정해보기 전에 K8S가 어떤 것인지 알아보며 로컬 환경에서 K8S를 구축해보려 한다. 로컬 환경에서 구축하는 방법 중 **Minikube**, **KinD(Kubernetes in Docker)**, **Docker Desktop** 등을 이용해 로컬 환경에서 Kubernetes를 실행하는 방법이 있으며, 이 중 `KinD`{: .text-blue}를 이용해 K8S 클러스터를 구축해보려한다.
 
-## **K8S란?**
+## **K8S(Kubernetes)란?**
 
 K8S는 컨테이너화된 애플리케이션을 자동으로 배포, 확장 및 관리하는 오픈소스 컨테이너 오케스트레이션 시스템이다.
 
