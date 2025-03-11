@@ -160,7 +160,7 @@ K8S 이용시 도커 자체를 런타임으로 이용하는 것과 containerd를
 
 - **K8S + Docker** : Docker를 중지하면 Pods 명령어를 이용하더라도 해당 API 서버가 Command를 받지 해 실행되지 않는다.
 
-> 참고 : [https://velog.io/@rockwellvinca/도커와-Containerd-런타임](https://velog.io/@rockwellvinca/%EB%8F%84%EC%BB%A4%EC%99%80-Containerd-%EB%9F%B0%ED%83%80%EC%9E%84)
+> 참고 : [https://velog.io/@rockwellvinca/도커와-Containerd-런타임](https://velog.io/@rockwellvinca/%EB%8F%84%EC%BB%A4%EC%99%80-Containerd-%EB%9F%B0%ED%83%80%EC%9E%84){:target="\_blank"}
 
 ### **CRI-O**
 
@@ -290,6 +290,8 @@ $ kind load docker-image {repository-name}/{image-name}:{tag} --name {cluster-na
 
 ConfigMap을 통해 배포에 필요한 환경 변수 정보를 설정하여 이용할 수 있다.
 
+#### **ConfigMap 리소스 설정**
+
 ```yaml
 # tp-config.yaml
 
@@ -305,6 +307,8 @@ data:
   DB_PWD: "{mysql-password}"
   SPRING_PROFILES_ACTIVE: "{project-profiles}"
 ```
+
+#### **Deployment 리소스 설정**
 
 ```yaml
 # travel-planner-deployment.yaml
@@ -372,6 +376,8 @@ spec:
 - hostPID : 각각의 독립적인 PID를 이용하는 Pod가 호스트 노드의 PID 네임스페이스를 공유하여 Pod 내에서 실행되는 프로세스가 호스트 노드의 모든 프로세스를 볼 수 있다.
   - 컨테이너에서 `ps aux`, `top`, `kill` 명령어 등을 실행하면 호스트의 모든 프로세스를 관리 가능하며 `시스템 모니터링`, `컨테이너가 호스트의 특정 프로세스를 제어`, `네트워크 및 보안 툴` 사용 가능하다.
 
+#### **Service 리소스 설정**
+
 ```yaml
 # travel-planner-service.yaml
 
@@ -388,12 +394,12 @@ spec:
     targetPort: 8080 # 컨테이너에서 사용할 포트
 ```
 
-#### **리소스 생성**
+#### **리소스(ConfigMap, Service, Deployment) 생성**
 
 ```bash
 $ kubectl apply -f tp-config.yaml
-$ kubectl apply -f travel-planner-deployment.yaml
 $ kubectl apply -f travel-planner-service.yaml
+$ kubectl apply -f travel-planner-deployment.yaml
 ```
 
 #### **Pods 세부 정보**
