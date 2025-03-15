@@ -730,3 +730,305 @@ JDK 17 이슈 : JDK 17에서 Cgroup V2(컨테이너 리소스 제한 관련)의 
 JDK 버전 변경 이후 Cgroup 내부 파일을 확인과 K8S에 정상적인 배포가 이루어진 것으로 보아 파일 접근 권한이 원인인 것으로 이슈를 해결할 수 있었다.
 
 ![JDK 17 버전 Metrics 이슈 해결]({{site.url}}/assets/img/KinD/15-JDK_17_0_9_Cgroup.png)
+
+## **K8S 리소스 설정과 HPA(Horizontal Pod Autoscaler)**
+
+K8S의 기본적인 설정과 배포를 진행해보았다. K8S에 핵심 기능으로서 **컨테이너 오케스트레이션 및 수평적 확장**에 대한 설정을 해보고자 한다.
+
+## **네임스페이스(Namespace)**
+
+K8S에서 네임스페이스는 클러스터 내 리소스 그룹 격리 메커니즘을 제공한다. 리소스 이름은 네임스페이스에서 유일해야하며 네임스페이스간에는 유일할 필요는 없다. 네임스페이스 기반 스코핑은 네임스페이스 기반 오브젝트 (예: 디플로이먼트, 서비스 등) 에만 적용 가능하며 클러스터 범위의 오브젝트 (예: 스토리지클래스, 노드, 퍼시스턴트볼륨 등) 에는 적용 불가능하다.
+
+클러스터를 만들게 되면 초기 네임스페이스는 아래와 같이 `default`{: .text-blue}, `kube-node-lease`{: .text-blue}, `kube-public`{: .text-blue}, `kube-system`{: .text-blue} 4개가 있다.
+
+![K8S Cluster Namespace]({{site.url}}/assets/img/KinD/16-K8S_Namespace.png)
+
+- default: 네임스페이스를 생성하지 않고도 default에서 새 클러스터를 사용할 수 있다.
+- kube-node-lease: 각 노드와 연관된 **`리스`{: .text-blue}** 오브젝트를 갖는다. 노드 리스는 kubelet이 **`하트비트`{: .text-blue}**를 보내서 컨트롤 플레인이 노드의 장애를 탐지할 수 있게 한다.
+  - **리스:** 분산 시스템에는 종종 공유 리소스를 잠그고 노드 간의 활동을 조정하는 메커니즘을 제공함에 있어 리스가 필요하다. `coordination.k8s.io`{: .text-blue} API 그룹에 있는 `Lease`{: .text-blue} 오브젝트로 표현되며, 노드 하트비트 및 컴포넌트 수준의 리더 선출과 같은 시스템 핵심 기능에서 사용된다.
+  - **하트비트**: 클러스터가 개별 노드가 가용한지를 판단할 수 있도록 도움을 주고, 장애가 발견된 경우 조치를 할 수 있게한다.
+- kube-public: 모든 클라이언트(인증되지 않은 클라이언트 포함)가 읽기 권한으로 접근할 수 있다. 주로 전체 클러스터 중에 공개적으로 드러나서 읽을 수 있는 리소스를 위해 예약되어 있으나, 공개적인 성격은 단지 관례이지 요구 사항은 아니다.
+- kube-system: 쿠버네티스 시스템에서 생성한 오브젝트를 위한 네임스페이스이다.
+
+> `kube-` 접두사로 시작하는 네임스페이스는 쿠버네티스 시스템용으로 예약되어 있으므로, 사용자는 이러한 네임스페이스를 생성하지 않는다.
+
+### **Namespace 리소스 생성**
+
+```yaml
+# tp-namespace.yaml
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {네임스페이스명}
+  labels:
+    environment: dev
+```
+
+```bash
+$ kubectl apply -f tp-namespace.yaml
+```
+
+### **현재 네임스페이스 변경**
+
+현재 Context를 기본(default) 네임스페이스에서 사용할 네임스페이스로 변경해준다.
+
+```bash
+$ kubectl config set-context --current --namespace={네임스페이스명}
+```
+
+> **주의 : 네임스페이스를 삭제하면 그 안의 모든 리소스(Pod, Deployment, Service 등)도 함께 삭제된다.**{: .text-red}
+
+### **Service, Deployment 리소스 네임스페이스 설정**
+
+```yaml
+# travel-planner-service.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: travel-planner-service
+  namespace: {네임스페이스명}
+...
+```
+
+```yaml
+# travel-planner-deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: travel-planner-app
+  namespace: {네임스페이스명}
+...
+```
+
+![K8S Cluster Namespace Dashboard]({{site.url}}/assets/img/KinD/17-K8S_Namespace_Dashboard.png)
+
+## **네임스페이스 리소스 제한 설정(ResourceQuota / LimitRange)**
+
+### **ResourceQuota와 LimitRange**
+
+**`ResourceQuota`{: .text-blue}**는 특정 네임스페이스가 **`사용할 수 있는 전체 리소스의 최대치를 제한`**한다. 이를 통해 한 네임스페이스가 과도한 리소스를 사용하여 다른 네임스페이스를 방해하는 것을 방지할 수 있다.
+
+**`LimitRange`{: .text-blue}**는 네임스페이스 내에서 **`각 컨테이너가 요청할 수 있는 리소스의 최소/최대값을 강제`**한다. 이를 통해 비효율적인 리소스 요청을 하지 못하도록 제한할 수 있습니다.
+
+### **ResourceQuota 리소스 설정**
+
+```yaml
+# tp-resource-quota.yml
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: tp-resource-quota
+  namespace: {네임스페이스명}
+spec:
+  hard:
+    pods: "5"               # 네임스페이스 내 최대 Pod 허용
+    requests.cpu: "5"       # 네임스페이스 내 요청 CPU
+    requests.memory: "5Gi"  # 네임스페이스 내 요청 메모리
+    limits.cpu: "10"        # 네임스페이스 내 제한 CPU
+    limits.memory: "10Gi"   # 네임스페이스 내 제한 메모리
+```
+
+이 네임스페이스는 `최대 5개 Pod가 허용`{: .text-blue} `CPU는 5 ~ 10개까지 이용 가능`{: .text-blue} `메모리는 5 ~ 10Gib까지 허용`{: .text-blue}한다.
+
+### **LimitRange 리소스 설정**
+
+```yaml
+# tp-limit-range.yml
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: tp-limit-range
+  namespace: {네임스페이스명}
+spec:
+  limits:
+  - type: Container
+    max:              # 컨테이너당 최대 CPU/Memory
+      cpu: "10"
+      memory: "10Gi"
+    min:              # 컨테이너당 최소 CPU/Memory
+      cpu: "1"
+      memory: "1Gi"
+    default:          # 명시적으로 요청하지 않은 경우 기본 요청 값
+      cpu: "2"      
+      memory: "2Gi"
+    defaultRequest:   # 컨테이너가 요청하는 기본 CPU/Memory
+      cpu: "1"
+      memory: "1Gi"
+```
+
+- **default**: 컨테이너가 리소스 요청을 하지 않았을 경우 자동으로 할당되는 최대 리소스이다.
+- **defaultRequest**: 컨테이너가 리소스를 요청하지 않았을 경우 자동으로 예약되는 최소 리소스이다.
+
+### **리소스 확인**
+
+```bash
+$ kubectl describe namespace {네임스페이스명}
+```
+
+![K8S Cluster Namespace Resource]({{site.url}}/assets/img/KinD/18-K8S_Namespace_Resource.png)
+
+### **Deployment 리소스 변경사항**
+
+위 LimitRange를 설정하게되면 기존의 Deployment에 `resources.requests`{: .text-blue} `resources.limits`{: .text-blue}설정에 대해서 아래 내용에 따라서 달라지게 된다.
+
+#### **Deployment에 resources (requests, limits)미설정**
+
+- requests는 LimitRange에 설정한 defaultRequest 값이 적용됨
+- limits는 LimitRange에 설정한 default 값이 적용됨
+
+> **리소스 제한을 초과하게 되면 Pod 스케줄링이 되지 않음**{: .text-red}
+
+## **HPA(Horizontal Pod Autoscaler)**
+
+HPA는 워크로드에 따라 Pod의 수평 확장/축소를 담당한다. 주로 **CPU, 메모리 사용량**, 또는 **사용자 정의 메트릭**을 기반으로 스케일링을 하며 기능을 정의하면 아래와 같다.
+
+- **자동 스케일링**: 클러스터의 리소스를 효율적으로 사용하기 위해, Pod 수를 자동으로 늘리거나 줄입니다.
+- **부하에 따라 조정**: HPA는 애플리케이션의 부하를 감지하고, 부하가 증가하면 더 많은 Pod을 생성하고, 부하가 감소하면 Pod 수를 줄여 리소스를 최적화합니다.
+- **CPU, 메모리 또는 메트릭 기반 스케일링**: 기본적으로 CPU 사용량, 메모리 사용량을 기준으로 스케일링을 진행하며, 사용자 정의 메트릭으로도 스케일링할 수 있습니다.
+
+### **HPA 리소스 설정 (수평적 확장)**
+
+```yaml
+# tp-hpa.yaml
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: tp-hpa
+  namespace: {네임스페이스명}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {deployment의 metadata.name}
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu # 확장 기준 리소스
+      target:
+        type: Utilization
+        averageUtilization: 60 # Pod 확장 기준 사용률
+```
+
+### **Deployment 변경**
+
+1. HPA에 의한 수평적 Pod AutoScaling을 위한 replicas 삭제
+2. LimitRange에서 리소스 관리를 위해 resources 삭제
+
+### **Metrics Server 구성**
+
+HPA 모니터링을 위해 Metric Server 리소스를 적용해준다.
+
+```bash
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.5.0/components.yaml
+```
+
+```bash
+$ kubectl get pods -n kube-system | grep metrics-server
+```
+
+```bash
+$ kubectl logs <metrics-server-pod-name> -n kube-system
+```
+
+#### **Metrics Server Kubectl 인증서 오류**
+
+처음 Metrics Server 설정 후 아래와 같은 오류가 발생할 수 있다.
+
+> "Get \"https://172.28.0.2:10250/stats/summary?only_cpu_and_memory=true\": x509: cannot validate certificate for 172.28.0.2 because it doesn't contain any IP SANs" node="travel-planner-cluster-control-plane"
+
+원인은 **Kubelet API 서버**의 인증서에 **IP SAN (Subject Alternative Name)** 항목이 없기 때문에 발생한다.
+
+Kubelet 인증서를 사용하고 있지 않다면 아래와 같이 설정 후 리소스를 변경해준다.
+
+```bash
+# Metrics Server Deployment 수정
+
+$ kubectl edit deployment metrics-server -n kube-system
+```
+
+```yaml
+...
+spec:
+  containers:
+    - name: metrics-server
+      args:
+        - --kubelet-insecure-tls # 추가
+        - ...
+```
+
+```bash
+$ kubectl rollout restart deployment metrics-server -n kube-system
+```
+
+![K8S Metrics Server Dashboard]({{site.url}}/assets/img/KinD/19-K8S-Metrics_Server.png)
+
+### **HPA 테스트**
+
+특정 API를 10000번 호출하는 방식으로 진행하여 테스트해보았다.
+
+```bash
+$ kubectl get hpa -n {네임스페이스명}
+```
+
+#### **CPU 제한 사용률 초과로 인한 Scale Out**
+
+CPU 사용률이 60%가 넘어가면서 신규 Pod 생성으로 Scale Out 발생
+
+![K8S HPA Process 1]({{site.url}}/assets/img/KinD/20-K8S_HPA_Process_1.png)
+
+#### **Pod 확장 후 리소스 안정화 결과**
+
+신규 Pod가 Healthy 상태가 되면서 CPU 사용률 안정화
+
+![K8S HPA Process 3]({{site.url}}/assets/img/KinD/21-K8S_HPA_Process_2.png)
+
+![K8S HPA Process 2]({{site.url}}/assets/img/KinD/22-K8S_HPA_Process_3.png)
+
+#### **테스트 종료 이후 신규 Pod 중단**
+
+API 호출이 모두 완료된 후 CPU 사용률이 안정화되면서 Replica Pod가 중단되었으며, 이벤트에서 Pod 생성부터 중단까지 세부적인 과정 확인
+
+![K8S HPA Process 4]({{site.url}}/assets/img/KinD/23-K8S_HPA_Process_4.png)
+
+![K8S HPA Process 5]({{site.url}}/assets/img/KinD/24-K8S_HPA_Process_5.png)
+
+### **HPA 안정화를 위한 축소 주요 설정**
+
+```yaml
+# tp-hpa.yaml
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: tp-hpa
+  namespace: {네임스페이스명}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {deployment의 metadata.name}
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu # 확장 기준 리소스
+      target:
+        type: Utilization
+        averageUtilization: 60 # Pod 확장 기준 사용률
+  stabilizationWindowSeconds: 60  # 60초 동안 안정화 확인 후 Pod 수 변경
+  scaleDownDelaySeconds: 30  # Pod 축소 전에 30초 지연
+```
+
+- **stabilizationWindowSeconds**: HPA가 Pod 수를 변경하기 전에 **`최소한의 안정화 기간`**을 두도록 설정한다. 이 기간 동안 CPU 사용량이 안정적으로 유지되면, Pod 수를 변경한다.
+- **scaleDownDelaySeconds**: Pod를 축소하기 전에 설정한 지연 시간 동안 **`대기`**한다. 이 시간 동안 CPU 사용량이 다시 증가할 수 있어, 축소가 과도하게 이루어지지 않도록 합니다.
+
+이 두 설정을 함께 적절히 사용하면 HPA의 스케줄링을 더 안정적으로 관리하고, 과도한 스케일링으로 인한 자원 낭비를 방지할 수 있다.
