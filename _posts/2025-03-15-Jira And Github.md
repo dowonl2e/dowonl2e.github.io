@@ -1,5 +1,5 @@
 ---
-title: Jira & Github 연동을 통한 이슈 처리 자동화
+title: Jira & Github 연동을 통한 이슈 자동화
 # author: dowonl2e
 date: 2025-03-15 07:00:00 +0800
 categories: [Jira]
