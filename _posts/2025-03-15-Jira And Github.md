@@ -3,7 +3,7 @@ title: Jira & Github 연동을 통한 이슈 처리 자동화
 # author: dowonl2e
 date: 2025-03-15 07:00:00 +0800
 categories: [Jira]
-tags: [Jira, Github]
+tags: [Jira, Github, Github Actions]
 pin: true
 img_path: "/assets"
 image:
