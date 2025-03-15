@@ -7,7 +7,7 @@ tags: [Jira, Github, Github Actions]
 pin: true
 img_path: "/assets"
 image:
-  path: /commons/jira.png
+  path: /commons/Jira.png
   alt: Jira
 ---
 
