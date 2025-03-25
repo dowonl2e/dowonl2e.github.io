@@ -1000,7 +1000,7 @@ API 호출이 모두 완료된 후 CPU 사용률이 안정화되면서 Replica P
 
 ![K8S HPA Process 5]({{site.url}}/assets/img/KinD/24-K8S_HPA_Process_5.png)
 
-### **HPA 안정화를 위한 축소 주요 설정**
+### **HPA 안정화를 위한 확장/축소 설정**
 
 ```yaml
 # tp-hpa.yaml
@@ -1024,11 +1024,44 @@ spec:
       target:
         type: Utilization
         averageUtilization: 60 # Pod 확장 기준 사용률
-  stabilizationWindowSeconds: 60  # 60초 동안 안정화 확인 후 Pod 수 변경
-  scaleDownDelaySeconds: 30  # Pod 축소 전에 30초 지연
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 1
+        periodSeconds: 15
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
 ```
 
-- **stabilizationWindowSeconds**: HPA가 Pod 수를 변경하기 전에 **`최소한의 안정화 기간`**을 두도록 설정한다. 이 기간 동안 CPU 사용량이 안정적으로 유지되면, Pod 수를 변경한다.
-- **scaleDownDelaySeconds**: Pod를 축소하기 전에 설정한 지연 시간 동안 **`대기`**한다. 이 시간 동안 CPU 사용량이 다시 증가할 수 있어, 축소가 과도하게 이루어지지 않도록 합니다.
+- **`scaleUp`(확장 설정)**
+  - **stabilizationWindowSeconds: 0**: 확장 적용 시간을 설정하며 `0`으로 설정하면 지연 없이 확장을 즉시 적용한다.
+  - **policies**
+    - **첫 번째 정책: type: Percent**
+      - **value**: 현재 Pod 개수 기준으로 확장할 파드 수의 비율을 설정한다.
+        - 현재 10개 실행 중 → 10개(100%) 추가 가능 (10 → 20)
+      - **periodSeconds**: 설정한 시간마다 평가한다.
+    - **두 번째 정책: type: Pods**
+      - **value**: 한 번에 확장할 파드의 수를 설정한다.
+      - **periodSeconds**: 설정한 시간마다 평가한다.
+  - **selectPolicy: Max**: Percent와 Pods 정책이 동시에 적용될 경우, 더 큰 값을 적용한다.
+    - 예) Percent(100%) vs Pods(4개) 중 더 많은 Pod을 추가하는 정책을 선택
+- **`scaleDown`(축소 설정)**
+  - **stabilizationWindowSeconds**
+    - Pod을 줄이기 전에 설정한 시간만큼 대기한 후 축소 여부를 결정하여 불필요한 축소를 방지한다.
+  - **policies**
+    - **type: Percent**: 백분율(%) 기준으로 축소할 때 적용한다.
+    - **value**: 한 번의 조정에서 현재 Pod의 100%까지 축소 가능하다.
+      - 100% 설정 시 기존 Pod의 절반까지 줄일 수 있다.
+    - **periodSeconds**: 설정한 시간마다 평가한다.
 
-이 두 설정을 함께 적절히 사용하면 HPA의 스케줄링을 더 안정적으로 관리하고, 과도한 스케일링으로 인한 자원 낭비를 방지할 수 있다.
+이 behavor 설정을 통해 HPA의 스케줄링을 더 안정적으로 관리하고, 과도한 스케일링으로 인한 자원 낭비를 방지할 수 있다.
