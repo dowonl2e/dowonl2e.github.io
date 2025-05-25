@@ -3,7 +3,7 @@ title: JPA + Spring Data JPA + Querydsl 사용해보기(1)
 # author: dowonl2e
 date: 2024-03-01 10:00:00 +0800
 categories: [Spring, JPA]
-tags: [JPA, Spring Data JPA, QueryDSL]
+tags: [JPA, Spring Data JPA, Querydsl]
 pin: true
 img_path: "/assets"
 image:
