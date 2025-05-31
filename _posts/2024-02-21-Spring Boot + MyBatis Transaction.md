@@ -247,10 +247,12 @@ Java의 오류를 크게 세 가지 유형으로 나뉩니다.
 - Checked Exception
 - Unchecked Exception
 - Error
-  ![Java 예외 종류]({{site.url}}/assets/img/transaction/10_Kind Of Exception.png)
-  [<center>https://marrrang.tistory.com/56</center>](https://marrrang.tistory.com/56){:target="\_blank"}
-  <br/>
-  UncheckedException은 런타임 때 발생하는 예외이다. NullPointerException는 코딩을 하다보면 특정 객체가 인스턴스화가 되지 않았음에도 컴파일시에는 오류로 확인하지 않는다. ArrayIndexOutOfBoundsException도 마찬가지이다.
+
+![Java 예외 종류]({{site.url}}/assets/img/transaction/10_Kind Of Exception.png)
+
+[<center>https://marrrang.tistory.com/56</center>](https://marrrang.tistory.com/56){:target="\_blank"}
+
+UncheckedException은 런타임 때 발생하는 예외이다. NullPointerException는 코딩을 하다보면 특정 객체가 인스턴스화가 되지 않았음에도 컴파일시에는 오류로 확인하지 않는다. ArrayIndexOutOfBoundsException도 마찬가지이다.
 
 반대로 CheckedException은 컴파일 중에 발생하는 예외이다. 테스트 코드에 IOException의 경우는 메서드 선언부에서 예외를 처리하거나 구현부에 try/catch로 감싸 처리를 해줘야한다.
 
@@ -389,4 +391,4 @@ public void multiSave() {
 - 트랜잭션에서는 Unchecked Exception, Error는 Transactional 설정만으로 롤백 가능하며, CheckedException은 개발자가 try/catch절을 통한 강제 롤백 또는 Transactional의 롤백설정을 해주어야한다. (**참고로 try/catch를 남발하는 것 보다 커스텀화 하여 처리하는 것이 좋아보인다.**)
 - 모든 오류 처리는 중요하지만, 트랜잭션의 롤백 기준에서 CheckedException은 개발과정에 별도 작업이 필요할 수 있기에, 정상 프로세스에 대한 로그 확인은 필수로 해야한다.
 
-> Github : [https://github.com/dowonl2e/transaction](https://github.com/dowonl2e/transaction)
+> Github : [https://github.com/dowonl2e/transaction](https://github.com/dowonl2e/transaction){:target="\_blank"}
