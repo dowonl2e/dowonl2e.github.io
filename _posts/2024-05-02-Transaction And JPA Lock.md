@@ -108,7 +108,7 @@ A 트랜잭션(5), B 트랜잭션(6)에서 5번이 먼저 실행되면 **REPEATA
 - **베타적 락(Exclusive Lock) 구문** : SELECT FOR UPDATE
 - **공유 락(Shared Lock) 구문** : SELECT FOR SHARE
 
-일반적인 RDBMS를 먼저 보자면 **`갭 락(Gap Lock)`{: .text-blue}**이 존재하지 않아 **`Phantom Read`{: .text-blue}**는 발생하게 된다.
+일반적인 RDBMS를 먼저 보자면 **`갭 락(Gap Lock)`{: .text-blue}**이 존재하지 않아 **`Phantom Read`{: .text-blue}**는 발생하게 된다고 한다.
 
 ![Phantom Read Solve2]({{site.url}}/assets/img/Transaction-JPA-Lock/5-Phantom_Read_Solve2.png)
 
@@ -163,7 +163,9 @@ A 트랜잭션(5), B 트랜잭션(6)에서 5번이 먼저 실행되면 **REPEATA
 
 READ COMMITTED는 반복 읽기를 수행하면 다른 트랜잭션에 의해 커밋된 내용을 조회하게 된다. **`Dirty Read`{: .text-blue}**는 방지되지만, 다른 트랜잭션의 커밋 여부에 따라 결과가 달라져 데이터의 부정합이 발생할 수 있는 **`Non-repeatable Read`{: .text-blue}** 문제가 발생할 수 있다. 
 
-**`Non-repeatable Read`{: .text-blue}**의 경우 일반적인 경우에는 문제가 되지 않지만, 은행 시스템에서의 돈과 관련된 처리에서는 큰 문제가 발생할 수 있다. 예를 들어 당일 전체 결제 비용 합산과 사용처별 결제 비용 합산을 처리하는 기능이 있다고 하자. 전체 결제 비용 합산이 완료되고 사용처별 결제 합산 비용을 처리하기 전 다른 트랜잭션에 의해 결제 내역이 계속해서 커밋되면, 전체 결제 비용과 사용처별 결제 비용은 맞지 않게 된다.
+**`Non-repeatable Read`{: .text-blue}**의 경우 일반적인 경우에는 문제가 되지 않지만, 은행 시스템에서의 돈과 관련된 처리에서는 큰 문제가 발생할 수 있다. 
+
+예를 들어, 당일 전체 결제 비용 합산과 사용처별 결제 비용 합산을 처리하는 기능이 있다고 하자. 전체 결제 비용 합산이 완료되고 사용처별 결제 합산 비용을 처리하기 전 다른 트랜잭션에 의해 결제 내역이 계속해서 커밋되면, 전체 결제 비용과 사용처별 결제 비용은 맞지 않게 된다.
 
 따라서, 격리 수준을 명확히 알고 결과를 예측할 수 있어야 한다.
 
