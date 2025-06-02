@@ -1,5 +1,5 @@
 ---
-title: Maven Central에 라이브러리 등록하기
+title: 내가 만든 모듈을 Maven Central 라이브러리로 등록하기
 # author: dowonl2e
 date: 2025-05-29 07:00:00 +0800
 categories: [Maven Central]
@@ -275,6 +275,6 @@ Gradle 전체 설정 이후 아래 명령어를 통해 배포한다. 만약, 인
 
 ## **Maven Central에 출판된 라이브러리 확인하기**
 
-정상적으로 라이브러리가 출판된 이후 별도 프로젝트를 생성하여 의존성 추가를 하면 아래와 같이 라이브러리가 등록된 것을 확인할 수 있다.
+이전에 개발한 엑셀 다운로드 모듈을 Maven Central Repository에 올려보았다. 정상적으로 라이브러리가 출판된 이후 별도 프로젝트를 생성하여 의존성 추가를 하면 아래와 같이 라이브러리가 등록된 것을 확인할 수 있다.
 
 ![Add Library Dependency Test]({{site.url}}/assets/img/maven-central-library/9-Library_Dependency_Test.png)
