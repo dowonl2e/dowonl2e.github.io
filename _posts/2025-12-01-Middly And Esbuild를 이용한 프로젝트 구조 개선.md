@@ -3,7 +3,7 @@ title: Middy & Esbuild를 이용한 프로젝트 구조 개선하기
 # author: dowonl2e
 date: 2025-12-01 07:00:00 +0900
 categories: [Middy]
-tags: [Middy, Esbuild, Typescript, Lambda]
+tags: [Middy, Esbuild, TypeScript, Lambda]
 pin: true
 ---
 
